@@ -1,0 +1,21 @@
+{
+	"members":[
+		{	"id":		"jd", 
+			"name":		"John Doe", 
+			"email":	"jd@jupiter.org"
+		},
+		{	"id":		"dh", 
+			"name":		"Die Hard", 
+			"email":	"dh@saturn.net"
+		}
+	],
+
+	"releases":[
+		{	"stream":	"PopCorn",
+			"version":	"2.beta"
+		},
+		{	"stream":	"KitKat",
+			"version":	"3.0.7"
+		}
+	]
+}
