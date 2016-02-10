@@ -17,5 +17,17 @@
 		{	"stream":	"KitKat",
 			"version":	"3.0.7"
 		}
-	]
+	],
+
+    "urlRules":{
+        "MyAssignments":[
+            "http://nerd.net/kick.php?start=1+", "$stream",
+            "+versionNo=", "$version",
+            "+(testFlags&128)<>0+(testFlags&64)=0",
+            "+ (owner='", "$id", "' OR ((owner IS NULL OR owner='')  and assignee='", "$id", "')) ",
+            "+end=1"
+        ],
+        "URT":[
+        ]
+    }
 }

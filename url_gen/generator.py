@@ -1,19 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-DEFAULT_URL_RULES_FILE = "url_gen/url.json"
-
 #
 # produce all url links
 #
-def get_urls(releases, members):
-    import json
-    url_rules_file = DEFAULT_URL_RULES_FILE
+def get_urls(url_rules, releases, members):
     urls = []
-
-    print("url rules file:", url_rules_file)
-    with open(url_rules_file) as url_rules_fp:
-        url_rules = json.load(url_rules_fp)
 
     url_rule = url_rules["MyAssignments"]
     for release in releases:

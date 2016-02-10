@@ -38,7 +38,8 @@ class WebNotifier(object):
         print("web-notifier is running!")
         releases = self.config_data["releases"]
         members = self.config_data["members"]
-        urls = get_urls(releases, members)
+        url_rules = self.config_data["urlRules"]
+        urls = get_urls(url_rules, releases, members)
         for url in urls:
             print("[get url]", url)
             web_content = get_web_content(url)
