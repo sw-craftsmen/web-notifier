@@ -4,6 +4,7 @@
 from htm_parse.parse import get_parsed_data
 from pp.pretty_print import get_beautiful_data
 from url_gen.generator import get_urls
+from url_gen.generator import get_urlsDict
 from web_fetch.fetcher import get_web_content
 
 DEFAULT_CONFIG_FILE = "config.json"
@@ -36,20 +37,35 @@ class WebNotifier(object):
 
     def run(self):
         print("web-notifier is running!")
+
+        parsed_data = {}
+
         releases = self.config_data["releases"]
         members = self.config_data["members"]
-        url_rules = self.config_data["urlRules"]
-        urls = get_urls(url_rules, releases, members)
-        for url in urls:
-            print("[get url]", url)
-            web_content = get_web_content(url)
-            print("[get web content]", web_content)
-            parsed_data = get_parsed_data(web_content)
-            print("[get parsed data]", parsed_data)
-            # here we can do post-analyze if required
-            pp_data = get_beautiful_data(parsed_data)
-            print("[get beautiful data]", pp_data)
-            # after all, we call notifier to do notification
+        url_rule = (self.config_data["urlRules"])["MyAssignments"]
+
+        urlsDict = get_urlsDict(url_rule, releases, members)
+
+        for member in members:
+            member_id = member["id"]
+            parsed_data[member_id] = {}
+
+            for release in releases:
+                release_stream = release["stream"]
+
+                url = urlsDict[member_id][release_stream]
+                print("[get url]", url)
+
+                web_content = get_web_content(url)
+                print("[get web content]", web_content)
+
+                parsed_data[member_id][release_stream] = get_parsed_data(web_content)
+                print("[get parsed data]", parsed_data[member_id][release_stream])
+
+        # here we can do post-analyze if required
+        pp_data = get_beautiful_data(parsed_data)
+        print("[get beautiful data]", pp_data)
+        # after all, we call notifier to do notification
 
     @staticmethod
     def __help():

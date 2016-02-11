@@ -4,23 +4,30 @@
 #
 # produce all url links
 #
-def get_urls(url_rules, releases, members):
+def get_urls(url_rule, releases, members):
     urls = []
-
-    url_rule = url_rules["MyAssignments"]
     for release in releases:
         for member in members:
             urls.append(get_url(url_rule, release, member))
-
     return urls
+
+#
+# returns a dictionary mapping member/release to url
+# i.e., urlsDict[member["id"]][release["stream"]] to get the url
+#
+def get_urlsDict(url_rule, releases, members):
+    urlsDict = {}
+    for member in members:
+        urlsDict[member["id"]] = {}
+        for release in releases:
+            urlsDict[member["id"]][release["stream"]] = get_url(url_rule, release, member)
+    return urlsDict
 
 #
 # produce one url
 #
 def get_url(url_rule, release, member):
-
     url = ""
-
     for element in url_rule:
         if element == "$stream":
             url += release["stream"]
@@ -30,5 +37,4 @@ def get_url(url_rule, release, member):
             url += member["id"]
         else:
             url += element
-
     return url
