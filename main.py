@@ -3,9 +3,10 @@
 
 from htm_parse.parse import get_parsed_data
 from pp.pretty_print import get_beautiful_data
-from url_gen.generator import get_urls
 from url_gen.generator import get_urlsDict
 from web_fetch.fetcher import get_web_content
+from analyze.analyzer import get_analyzed_data
+from notify.notifier import notify
 
 DEFAULT_CONFIG_FILE = "config.json"
 
@@ -54,18 +55,22 @@ class WebNotifier(object):
                 release_stream = release["stream"]
 
                 url = urlsDict[member_id][release_stream]
-                print("[get url]", url)
+                print("[got url]", url)
 
                 web_content = get_web_content(url)
-                print("[get web content]", web_content)
+                print("[got web content]")
 
                 parsed_data[member_id][release_stream] = get_parsed_data(web_content)
-                print("[get parsed data]", parsed_data[member_id][release_stream])
+                print("[got parsed data]")
 
-        # here we can do post-analyze if required
-        pp_data = get_beautiful_data(parsed_data)
-        print("[get beautiful data]", pp_data)
-        # after all, we call notifier to do notification
+        analyzed_data = get_analyzed_data(parsed_data)
+        print("[got analyzed data]")
+
+        pp_data = get_beautiful_data(analyzed_data)
+        print("[got beautiful data]", pp_data)
+
+        notify(pp_data, members)
+        print("[notification done]")
 
     @staticmethod
     def __help():
