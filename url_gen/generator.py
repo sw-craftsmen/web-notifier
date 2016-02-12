@@ -6,8 +6,8 @@
 #
 def get_urls(url_rule, releases, members):
     urls = []
-    for release in releases:
-        for member in members:
+    for release in releases.values():
+        for member in members.values():
             urls.append(get_url(url_rule, release, member))
     return urls
 
@@ -17,9 +17,9 @@ def get_urls(url_rule, releases, members):
 #
 def get_urlsDict(url_rule, releases, members):
     urlsDict = {}
-    for member in members:
+    for member in members.values():
         urlsDict[member["id"]] = {}
-        for release in releases:
+        for release in releases.values():
             urlsDict[member["id"]][release["stream"]] = get_url(url_rule, release, member)
     return urlsDict
 
