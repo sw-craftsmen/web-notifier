@@ -75,7 +75,7 @@ class WebNotifier(object):
         analyzed_data = get_analyzed_data(parsed_data)
         print("[got analyzed data]")
 
-        pp_data = get_beautiful_data(analyzed_data)
+        pp_data = get_beautiful_data(analyzed_data, members, releases)
         print("[got beautiful data]", pp_data)
 
         notify(pp_data, members)
