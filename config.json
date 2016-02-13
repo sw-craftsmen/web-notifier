@@ -15,11 +15,13 @@
 	"releases":{
         "PopCorn":
 		{	"stream":	"",
-			"version":	"2.beta"
+			"version":	"2.beta",
+            "date":     "199802"
 		},
         "KitKat":
 		{	"stream":	"",
-			"version":	"3.0.7"
+			"version":	"3.0.7",
+            "date":     "201211"
 		}
     },
 
