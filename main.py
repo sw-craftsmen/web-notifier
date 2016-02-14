@@ -16,26 +16,30 @@ class WebNotifier(object):
     config_data = None
 
     def __init__(self):
-        config_file = DEFAULT_CONFIG_FILE
-        import sys
-        if len(sys.argv) >= 2:
-            for argument in sys.argv[1:]:
-                if "-" == argument[0]:
-                    if argument in ["-h", "-help"]:
-                        self.__help()
-                        sys.exit()
-                    else:
-                        print("unrecognized option:", argument)
-                else:
-                    config_file = argument
-        self.__parse_config(config_file)
+        import argparse
+
+        arg_parser = argparse.ArgumentParser()
+        arg_parser.add_argument("-c", "--config", 
+            dest="config_file", default=DEFAULT_CONFIG_FILE, 
+            help="config file name (default: '" + DEFAULT_CONFIG_FILE + "')")
+        arg_parser.add_argument("-l", "--login",
+            dest="web_login", default="", 
+            help="web authentication login")
+        arg_parser.add_argument("-p", "--password",
+            dest="web_password", default="", 
+            help="web authentication password")
+        args = arg_parser.parse_args()
+
+        self.__parse_config(args.config_file)
 
     def __parse_config(self, config_file):
-        import json
-        print("config file:", config_file)
-        config_fp = open(config_file)
-        self.config_data = json.load(config_fp)
-        config_fp.close()
+        try:
+            with open(config_file) as config_fp:
+                import json
+                self.config_data = json.load(config_fp)
+        except IOError:
+            print("Config file '" + config_file + "' does NOT exist!")
+            exit()
 
     def run(self):
         print("web-notifier is running!")
