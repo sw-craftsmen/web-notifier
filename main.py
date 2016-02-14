@@ -3,7 +3,7 @@
 
 from htm_parse.parse import get_parsed_data
 from pp.pretty_print import get_beautiful_data
-from url_gen.generator import get_urlsDict
+from url_gen.generator import UrlGenerator
 from web_fetch.fetcher import get_web_content
 from analyze.analyzer import get_analyzed_data
 from notify.notifier import notify
@@ -31,50 +31,32 @@ class WebNotifier(object):
         self.__parse_config(config_file)
 
     def __parse_config(self, config_file):
-
         import json
         print("config file:", config_file)
         config_fp = open(config_file)
         self.config_data = json.load(config_fp)
         config_fp.close()
 
-        # initialize release["stream"]
-        for key, release in self.config_data["releases"].items():
-            release["stream"] = key
-        # initialize member["id"]
-        for key, member in self.config_data["members"].items():
-            member["id"] = key
-
     def run(self):
         print("web-notifier is running!")
 
-        releases = self.config_data["releases"]
-        members = self.config_data["members"]
-        url_rules = self.config_data["urlRules"]
-
-        url_rule = url_rules["MyAssignments"]
-        urlsDict = get_urlsDict(url_rule, releases, members)
         parsed_data = {}
 
-        for member in members.values():
-            member_id = member["id"]
-            parsed_data[member_id] = {}
+        for url, key in UrlGenerator(self.config_data):
+            print("[got url]", url)
 
-            for release in releases.values():
-                release_stream = release["stream"]
+            web_content = get_web_content(url)
+            print("[got web content]")
 
-                url = urlsDict[member_id][release_stream]
-                print("[got url]", url)
-
-                web_content = get_web_content(url)
-                print("[got web content]")
-
-                parsed_data[member_id][release_stream] = get_parsed_data(web_content)
-                print("[got parsed data]")
+            parsed_data[key["member_id"]] = {}
+            parsed_data[key["member_id"]][key["release_stream"]] = get_parsed_data(web_content)
+            print("[got parsed data]")
 
         analyzed_data = get_analyzed_data(parsed_data)
         print("[got analyzed data]")
 
+        releases = self.config_data["releases"]
+        members = self.config_data["members"]
         pp_data = get_beautiful_data(analyzed_data, members, releases)
         print("[got beautiful data]", pp_data)
 
