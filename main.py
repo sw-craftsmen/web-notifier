@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import argparse
+import logging
+
 from htm_parse.parse import get_parsed_data
 from pp.pretty_print import get_beautiful_data
 from url_gen.generator import UrlGenerator
@@ -9,14 +12,13 @@ from analyze.analyzer import get_analyzed_data
 from notify.notifier import notify
 
 DEFAULT_CONFIG_FILE = "config.json"
-
+ARGS = None
 
 class WebNotifier(object):
 
     config_data = None
 
     def __init__(self):
-        import argparse
 
         arg_parser = argparse.ArgumentParser()
         arg_parser.add_argument("-c", "--config", 
@@ -32,11 +34,16 @@ class WebNotifier(object):
             dest="history_json", default="", 
             help="history info in json format")
         arg_parser.add_argument("-x", "--excludes_json",
-            dest="excludes_json", default="", 
+            dest="excludes_json", default="",
             help="exclude list in json format")
-        args = arg_parser.parse_args()
+        arg_parser.add_argument("-v", "--verbose",
+            dest="log_level", action="store_const", const=logging.INFO,
+            help="show verbose info")
 
-        self.__parse_config(args.config_file)
+        ARGS = arg_parser.parse_args()
+        logging.basicConfig(level=ARGS.log_level)
+
+        self.__parse_config(ARGS.config_file)
 
     def __parse_config(self, config_file):
         try:
@@ -48,30 +55,30 @@ class WebNotifier(object):
             exit()
 
     def run(self):
-        print("web-notifier is running!")
+        logging.info("web-notifier is running!")
 
         parsed_data = {}
 
         for url, key in UrlGenerator(self.config_data):
-            print("[got url]", url)
+            logging.info("[got url]"+url)
 
             web_content = get_web_content(url)
-            print("[got web content]")
+            logging.info("[got web content]")
 
             parsed_data[key["member_id"]] = {}
             parsed_data[key["member_id"]][key["release_stream"]] = get_parsed_data(web_content)
-            print("[got parsed data]")
+            logging.info("[got parsed data]")
 
         analyzed_data = get_analyzed_data(parsed_data)
-        print("[got analyzed data]")
+        logging.info("[got analyzed data]")
 
         releases = self.config_data["releases"]
         members = self.config_data["members"]
         pp_data = get_beautiful_data(analyzed_data, members, releases)
-        print("[got beautiful data]", pp_data)
+        logging.info("[got beautiful data]"+pp_data)
 
         notify(pp_data, members)
-        print("[notification done]")
+        logging.info("[notification done]")
 
     @staticmethod
     def __help():
