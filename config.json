@@ -5,21 +5,21 @@
 			"name":		"John Doe", 
 			"email":	"jd@jupiter.org"
 		},
-        "dh":
-		{	"id":		"", 
+        "dh":{
+			"id":		"", 
 			"name":		"Die Hard", 
 			"email":	"dh@saturn.net"
 		}
     },
 
 	"releases":{
-        "PopCorn":
-		{	"stream":	"",
+        "PopCorn":{
+			"stream":	"",
 			"version":	"2.beta",
             "date":     "199802"
 		},
-        "KitKat":
-		{	"stream":	"",
+        "KitKat":{
+			"stream":	"",
 			"version":	"3.0.7",
             "date":     "201211"
 		}
@@ -30,9 +30,9 @@
             "http://nerd.net/kick.php?start=1+", "$stream",
             "+versionNo=", "$version",
             "+(testFlags&128)<>0+(testFlags&64)=0",
-            "+ (owner='", "$id", 
-            "' OR ((owner IS NULL OR owner='')  and assignee='", "$id", 
-            "')) ",
+            "+%20(owner='", "$id", 
+            "'%20OR%20((owner%20IS%20NULL%20OR%20owner='')%20and%20assignee='", "$id", 
+            "'))",
             "+end=1"
         ],
         "URT":[

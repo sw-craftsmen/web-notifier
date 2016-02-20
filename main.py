@@ -28,6 +28,12 @@ class WebNotifier(object):
         arg_parser.add_argument("-p", "--password",
             dest="web_password", default="", 
             help="web authentication password")
+        arg_parser.add_argument("-s", "--history_json",
+            dest="history_json", default="", 
+            help="history info in json format")
+        arg_parser.add_argument("-x", "--excludes_json",
+            dest="excludes_json", default="", 
+            help="exclude list in json format")
         args = arg_parser.parse_args()
 
         self.__parse_config(args.config_file)
