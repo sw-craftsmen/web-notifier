@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import argparse
+from argparse import ArgumentParser
 import logging
 
 from htm_parse.parse import get_parsed_data
@@ -12,15 +12,15 @@ from analyze.analyzer import get_analyzed_data
 from notify.notifier import notify
 
 DEFAULT_CONFIG_FILE = "config.json"
-ARGS = None
 
 class WebNotifier(object):
 
     config_data = None
+    args = None
 
     def __init__(self):
 
-        arg_parser = argparse.ArgumentParser()
+        arg_parser = ArgumentParser()
         arg_parser.add_argument("-c", "--config", 
             dest="config_file", default=DEFAULT_CONFIG_FILE, 
             help="config file name (default: '" + DEFAULT_CONFIG_FILE + "')")
@@ -40,10 +40,10 @@ class WebNotifier(object):
             dest="log_level", action="store_const", const=logging.INFO,
             help="show verbose info")
 
-        ARGS = arg_parser.parse_args()
-        logging.basicConfig(level=ARGS.log_level)
+        self.args = arg_parser.parse_args()
+        logging.basicConfig(level=self.args.log_level)
 
-        self.__parse_config(ARGS.config_file)
+        self.__parse_config(self.args.config_file)
 
     def __parse_config(self, config_file):
         try:
@@ -60,9 +60,9 @@ class WebNotifier(object):
         parsed_data = {}
 
         for url, key in UrlGenerator(self.config_data):
-            logging.info("[got url]"+url)
+            logging.info("[got url]" + url)
 
-            web_content = get_web_content(url)
+            web_content = get_web_content(url, self.args.web_login, self.args.web_password)
             logging.info("[got web content]")
 
             parsed_data[key["member_id"]] = {}
@@ -75,7 +75,7 @@ class WebNotifier(object):
         releases = self.config_data["releases"]
         members = self.config_data["members"]
         pp_data = get_beautiful_data(analyzed_data, members, releases)
-        logging.info("[got beautiful data]"+pp_data)
+        logging.info("[got beautiful data]" + pp_data)
 
         notify(pp_data, members)
         logging.info("[notification done]")
