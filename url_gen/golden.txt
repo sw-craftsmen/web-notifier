@@ -1,4 +1,4 @@
-http://nerd.net/kick.php?start=1+PopCorn+versionNo=2.beta+(testFlags&128)<>0+(testFlags&64)=0+ (owner='dh' OR ((owner IS NULL OR owner='')  and assignee='dh')) +end=1
-http://nerd.net/kick.php?start=1+KitKat+versionNo=3.0.7+(testFlags&128)<>0+(testFlags&64)=0+ (owner='dh' OR ((owner IS NULL OR owner='')  and assignee='dh')) +end=1
-http://nerd.net/kick.php?start=1+PopCorn+versionNo=2.beta+(testFlags&128)<>0+(testFlags&64)=0+ (owner='jd' OR ((owner IS NULL OR owner='')  and assignee='jd')) +end=1
-http://nerd.net/kick.php?start=1+KitKat+versionNo=3.0.7+(testFlags&128)<>0+(testFlags&64)=0+ (owner='jd' OR ((owner IS NULL OR owner='')  and assignee='jd')) +end=1
+http://nerd.net/kick.php?start=1+PopCorn+versionNo=2.beta+(testFlags&128)<>0+(testFlags&64)=0+%20(owner='dh'%20OR%20((owner%20IS%20NULL%20OR%20owner='')%20and%20assignee='dh'))+end=1
+http://nerd.net/kick.php?start=1+KitKat+versionNo=3.0.7+(testFlags&128)<>0+(testFlags&64)=0+%20(owner='dh'%20OR%20((owner%20IS%20NULL%20OR%20owner='')%20and%20assignee='dh'))+end=1
+http://nerd.net/kick.php?start=1+PopCorn+versionNo=2.beta+(testFlags&128)<>0+(testFlags&64)=0+%20(owner='jd'%20OR%20((owner%20IS%20NULL%20OR%20owner='')%20and%20assignee='jd'))+end=1
+http://nerd.net/kick.php?start=1+KitKat+versionNo=3.0.7+(testFlags&128)<>0+(testFlags&64)=0+%20(owner='jd'%20OR%20((owner%20IS%20NULL%20OR%20owner='')%20and%20assignee='jd'))+end=1
