@@ -10,7 +10,9 @@ class UrlGeneratorTest(unittest.TestCase):
     __config_data = None
 
     def setUp(self):
+        print("==================")
         print("Url generator test")
+        print("==================")
         config_file = "../config.json"
         with open(config_file) as config_fp:
             self.__class__.__config_data = json.load(config_fp)

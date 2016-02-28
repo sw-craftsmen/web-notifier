@@ -4,7 +4,7 @@
 from argparse import ArgumentParser
 import logging
 
-from htm_parse.parse import get_parsed_data
+from htm_parse.parser import get_parsed_data
 from pp.pretty_print import get_beautiful_data
 from url_gen.generator import UrlGenerator
 from web_fetch.fetcher import get_web_content
