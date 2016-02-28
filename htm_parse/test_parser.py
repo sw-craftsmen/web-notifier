@@ -12,7 +12,7 @@ class HtmParserTest(unittest.TestCase):
         print("htm parser test")
         print("===============")
 
-    def test_url(self):
+    def test_htm_parse(self):
         htm_file = "weather.htm"
         from parser import HtmDataRetriever, IsValidSegment
         is_match_pattern = IsValidSegment(["Hanoi", "Melbourne", "Singapore"], exact_match=True)
