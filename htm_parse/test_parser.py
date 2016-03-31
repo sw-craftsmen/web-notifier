@@ -14,13 +14,13 @@ class HtmParserTest(unittest.TestCase):
 
     def test_htm_parse(self):
         htm_file = "weather.htm"
-        from parser import HtmDataRetriever, IsValidSegment
+        from htm_parse.parser import HtmDataRetriever, IsValidSegment
         is_match_pattern = IsValidSegment(["Hanoi", "Melbourne", "Singapore"], exact_match=True)
         target_sequence = ["City", "Weather", "Temperature(℃)"]
         retriever = HtmDataRetriever(htm_file, is_match_pattern, target_sequence)
 
         golden_file = "golden.txt"
-        with open(golden_file) as f:
+        with open(golden_file, encoding='utf8') as f:
             golden_entries = f.read().splitlines()
 
         self.assertEqual(len(retriever), len(golden_entries))

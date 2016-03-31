@@ -77,7 +77,7 @@ class HtmAnalyzer(object):
             logging.warning("htm file \'%s\' does not exist" % self.__htm_file)
             return False
         # with open(self.__htm_file, encoding='latin-1') as fd:
-        with open(self.__htm_file) as fd:
+        with open(self.__htm_file, encoding='utf8') as fd:
             web_content = fd.read()
         self.__content = iter(HTMLParser().parse_and_retrieve(web_content))
         return True

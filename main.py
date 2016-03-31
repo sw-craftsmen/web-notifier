@@ -2,92 +2,100 @@
 # -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser
+import collections
 import logging
+import os
 
-from htm_parse.parser import get_parsed_data
-from pp.pretty_print import get_beautiful_data
-from url_gen.generator import UrlGenerator
-from web_fetch.fetcher import get_web_content
-from analyze.analyzer import get_analyzed_data
-from notify.notifier import notify
+from pp.pretty_print import get_beautiful_data, get_beautiful_pre_json
+from util.content import get_content
+from util.setting.post_analysis import file_modified_today
 
 DEFAULT_CONFIG_FILE = "config.json"
+DEFAULT_CONFIG_PRIVATE_FILE = "config_private.ini"
+DEFAULT_OUTFILE = "output.json"
+
 
 class WebNotifier(object):
 
-    config_data = None
-    args = None
-
     def __init__(self):
-
         arg_parser = ArgumentParser()
-        arg_parser.add_argument("-c", "--config", 
-            dest="config_file", default=DEFAULT_CONFIG_FILE, 
-            help="config file name (default: '" + DEFAULT_CONFIG_FILE + "')")
-        arg_parser.add_argument("-l", "--login",
-            dest="web_login", default="", 
-            help="web authentication login")
-        arg_parser.add_argument("-p", "--password",
-            dest="web_password", default="", 
-            help="web authentication password")
-        arg_parser.add_argument("-s", "--history_json",
-            dest="history_json", default="", 
-            help="history info in json format")
-        arg_parser.add_argument("-x", "--excludes_json",
-            dest="excludes_json", default="",
-            help="exclude list in json format")
-        arg_parser.add_argument("-v", "--verbose",
-            dest="log_level", action="store_const", const=logging.INFO,
-            help="show verbose info")
-
+        arg_parser.add_argument("-c", "--config", dest="config_file", default=DEFAULT_CONFIG_FILE,
+                                help="config file name (default: '%s')" % DEFAULT_CONFIG_FILE)
+        arg_parser.add_argument("-cp", "--config_private",
+                                dest="config_private_file", default=DEFAULT_CONFIG_PRIVATE_FILE,
+                                help="config_private file name (default: '%s')" % DEFAULT_CONFIG_PRIVATE_FILE)
+        arg_parser.add_argument("-o", "--output", dest="output", default=DEFAULT_OUTFILE,
+                                help="output file name (default: '%s')" % DEFAULT_OUTFILE)
+        arg_parser.add_argument("-l", "--login", dest="web_login", default="", help="web authentication login")
+        arg_parser.add_argument("-p", "--password", dest="web_password", default="", help="web authentication password")
+        arg_parser.add_argument("-v", "--verbose", dest="log_level", action="store_const",
+                                const=logging.INFO, help="show verbose info")
         self.args = arg_parser.parse_args()
-        logging.basicConfig(level=self.args.log_level)
+        logging.basicConfig(format='', level=self.args.log_level)
 
-        self.__parse_config(self.args.config_file)
-
-    def __parse_config(self, config_file):
-        try:
-            with open(config_file) as config_fp:
-                import json
-                self.config_data = json.load(config_fp)
-        except IOError:
-            print("Config file '" + config_file + "' does NOT exist!")
-            exit()
+        from util.config import Config
+        self.__config = Config(self.args.config_file)
+        if os.path.exists(self.args.config_private_file):
+            import configparser
+            config_parser = configparser.ConfigParser()
+            config_parser.read(self.args.config_private_file)
+            if "" == self.args.web_login and config_parser.has_option("account", "username"):
+                self.args.web_login = config_parser.get("account", "username")
+            if "" == self.args.web_password and config_parser.has_option("account", "password"):
+                self.args.web_password = config_parser.get("account", "password")
 
     def run(self):
-        logging.info("web-notifier is running!")
+        logging.info("[WbNt] web-notifier is running!")
 
-        parsed_data = {}
+        notify_data = collections.OrderedDict()  # key: notify_name, value: dict (see below)
+        for notify_name in self.__config.notifications:
+            print("[WbNt] dealing with notification \"%s\"" % notify_name)
+            parsed_data = collections.OrderedDict()  # key: source key, value: list of parsed data
+            notification = self.__config.notifications[notify_name]
+            for entry in notification.get_key_and_path():
+                assert isinstance(entry, list) and 2 == len(entry)
+                [key, path] = entry
+                print("[WbNt] %s" % [key_value_pair[1] for key_value_pair in list(key.items())], end="")
+                logging.info("[WbNt] " + path)
+                content = get_content(path, self.args.web_login, self.args.web_password)
+                WebNotifier.backup_content(key, content)
+                data_list = notification.parser.parse(content)
+                if data_list:
+                    assert type(data_list) is list
+                    source_key = tuple(sorted(key.items()))  # convert to sorted-tuple, for dict is not hashable
+                    parsed_data[source_key] = data_list
+                    print(" => find %i entry(s)" % len(data_list), end="")
+                print("")
+            analyzed_data = notification.post_analysis.analyze(parsed_data, notify_data)
+            notify_data[notify_name] = analyzed_data
 
-        for url, key in UrlGenerator(self.config_data):
-            logging.info("[got url]" + url)
+        print(get_beautiful_data(notify_data))
 
-            web_content = get_web_content(url, self.args.web_login, self.args.web_password)
-            logging.info("[got web content]")
+        import json
+        output_file = self.args.output
+        with open(output_file, 'w') as write_fd:
+            json.dump(get_beautiful_pre_json(notify_data), write_fd)
 
-            parsed_data[key["member_id"]] = {}
-            parsed_data[key["member_id"]][key["release_stream"]] = get_parsed_data(web_content)
-            logging.info("[got parsed data]")
-
-        analyzed_data = get_analyzed_data(parsed_data)
-        logging.info("[got analyzed data]")
-
-        releases = self.config_data["releases"]
-        members = self.config_data["members"]
-        pp_data = get_beautiful_data(analyzed_data, members, releases)
-        logging.info("[got beautiful data]" + pp_data)
-
-        notify(pp_data, members)
-        logging.info("[notification done]")
+        logging.info("[WbNt] notification done")
 
     @staticmethod
-    def __help():
-        help_msg = "web-notifier - usage\n" \
-                   "\tmain.py [config_file]\n" \
-                   "=============================\n" \
-                   "config_file: a file that gives various setting to web-notifier\n" \
-                   "             if not given, will search for \"%s\" at current directory" % DEFAULT_CONFIG_FILE
-        print(help_msg)
+    def backup_content(key, content):
+        assert isinstance(key, collections.OrderedDict)
+        key_name = ""
+        for entry in key:
+            key_name += ("_" + key[entry])
+        _, ext_name = os.path.splitext(content)
+        backup_dir = "content_backup"
+        if not os.path.exists(backup_dir):
+            os.mkdir(backup_dir)
+        content_name = key_name.replace(' ', '').replace('+', '_').replace('.', '') + ext_name
+        immature_content_name = backup_dir + "/immature" + content_name
+        mature_content_name = backup_dir + "/mature" + content_name
+        from shutil import copyfile
+        if not os.path.exists(mature_content_name) or not file_modified_today(mature_content_name):
+            if os.path.exists(immature_content_name):
+                copyfile(immature_content_name, mature_content_name)
+        copyfile(content, immature_content_name)
 
 
 if __name__ == '__main__':

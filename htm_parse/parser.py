@@ -5,9 +5,22 @@ import logging
 import os
 
 
-def get_parsed_data(web_content):  # TODO: change the input to 'htm_file' (instead of 'web_content')
-    parsed_data = "json format parsed data from given web content"
-    return parsed_data
+def get_parsed_data(web_page, key, sequence):
+    if not web_page or not os.path.exists(web_page):
+        return None
+
+    def is_match_pattern(test_pattern):
+        return key in test_pattern  # TODO: use re
+
+    cases = []
+    for retrieved_data in HtmDataRetriever(web_page, is_match_pattern, sequence):
+        import copy
+        cases.append(copy.deepcopy(retrieved_data))
+        assert len(retrieved_data) == len(sequence)
+        for pattern in sequence:
+            # print("%s => %s" % (pattern, retrieved_data[pattern]))
+            pass
+    return cases
 
 
 class IsValidSegment(object):
@@ -48,16 +61,16 @@ class HtmDataRetriever(object):
         assert type(htm_file) is str
         empty_iter = iter([]), 0
         if not os.path.exists(htm_file):
-            logging.warning("htm file \'%s\' does not exist" % htm_file)
+            logging.warning("[parser] htm file \'%s\' does not exist" % htm_file)
             return empty_iter
         if not target_sequence:
-            logging.warning("no target sequence specified")
+            logging.warning("[parser] no target sequence specified")
             return empty_iter
 
-        from parse_engine import HtmAnalyzer, HTMSpec, PosSpec
+        from htm_parse.parse_engine import HtmAnalyzer, HTMSpec, PosSpec
         analyzer = HtmAnalyzer(htm_file)
         if not analyzer.access():
-            logging.warning("htm analyzer failed!")
+            logging.warning("[parser] htm analyzer failed!")
             return empty_iter
 
         start_pattern = target_sequence[0]
@@ -66,7 +79,7 @@ class HtmDataRetriever(object):
         for pattern in subsequent_patterns:
             pos_spec.add_spec(pattern, IsValidSegment([pattern]))
         if not analyzer.read_pos(pos_spec):
-            logging.warning("cannot find matched sequence")
+            logging.info("[parser] cannot find matched sequence")
             return empty_iter
 
         logging.debug("%i " * (len(subsequent_patterns)) % tuple(analyzer.get_values(subsequent_patterns)))
@@ -77,7 +90,8 @@ class HtmDataRetriever(object):
         htm_spec.add_spec("spec_name", is_match_pattern, value_spec)  # we only support one spec. for HtmDataRetriever
         values_list = []
         while analyzer.read(htm_spec):
-            value_dict = {}
+            import collections
+            value_dict = collections.OrderedDict()
             for pattern in target_sequence:
                 value_dict[pattern] = analyzer.get_value(pattern)
             values_list.append(value_dict)

@@ -6,3 +6,7 @@
 *.iml
 
 *.pyc
+*.bak
+*.txt
+*.csv
+*.list

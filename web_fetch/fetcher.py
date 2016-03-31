@@ -10,7 +10,11 @@ HTML_FILE_NAME = "retrieved_page.html"
 
 
 def get_web_content(url, login, password):
-    return __get_html_lines(url, login, password, for_test=True)
+    return __get_html_lines(url, login, password)
+
+
+def get_web_page(url, login, password):
+    return __get_html(url, login, password)
 
 
 def locate_abs_exec(program):  # 'program' can be an absolute path name, or just a basename
@@ -37,7 +41,6 @@ def __get_html_by_wget(url, out_file, web_login,  web_password):
         sys.exit()
     output, error = Popen([wget_abs_path, "-O", out_file, web_login, web_password, url],
                           stdout=PIPE, stderr=PIPE).communicate()
-
     logging.info(output + error)
 
 
@@ -63,23 +66,21 @@ def __get_html_content(url, out_file, web_login,  web_password):
 #
 # Retrieve web content
 #
-def __get_html_lines(url, login, password, for_test):
- 
-    web_login = ''
-    web_password = ''
-    if login:
-        web_login = "--user=" + login
-    if password:
-        web_password = "--password=" + password
+def __get_html_lines(url, login, password):
 
-    effective_url = url if not for_test else "http://www.grymoire.com/Unix/Quote.html"
-
-    if not __get_html_content(effective_url, HTML_FILE_NAME, web_login, web_password):
-        logging.error("cannot open url: " + effective_url)
+    if not __get_html_content(url, HTML_FILE_NAME, login, password):
+        logging.error("[retriever] cannot open url: " + url)
         return {}
 
-    html_lines = {}
     with open(HTML_FILE_NAME, "r") as html_fp:
         html_lines = html_fp.readlines()
     return html_lines
 
+
+def __get_html(url, login, password):
+
+    if not __get_html_content(url, HTML_FILE_NAME, login, password):
+        logging.error("[retriever] cannot open url: " + url)
+        return None
+
+    return HTML_FILE_NAME  # TODO: use encoded file name
