@@ -233,10 +233,10 @@ class PostAnalysis(object):
                         assert type(value_list) is list
                         exclude_list = []
                         for value in value_list:
-                            if value in exclude_setting:
-                                exclude_list.append(value)
+                            if value['Test'] in exclude_setting:
+                                exclude_list.append(value['Test'])
                         for value in exclude_list:
-                            value_list.remove(value)
+                            value_list.remove({'Test':value})
                         data_to_be_excluded[entry] = value_list
 
     def analyze(self, raw_data, notify_data):

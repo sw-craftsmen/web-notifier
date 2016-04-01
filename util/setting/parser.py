@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from htm_parse.parser import get_parsed_data
-
+import collections
 
 KEY_KEY = "key"
 COLUMNS_KEY = "columns"
@@ -34,7 +34,9 @@ class TxtParser(object):
                     end_pos = line_str.find(" ")
                     assert -1 != end_pos
                     value = line_str[:end_pos]
-                    found_values.append(value)
+                    found_values.append(collections.OrderedDict({
+                        'Test': value
+                    }))
             return found_values
 
 
