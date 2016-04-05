@@ -194,7 +194,7 @@ class PostAnalysis(object):
             assert type(aware_data) in [list, collections.OrderedDict]
             if type(aware_data) is list:
                 for one_data in aware_data:
-                    assert type(one_data) is collections.OrderedDict
+                    assert type(one_data) in [str, collections.OrderedDict]
                     if one_data == data:
                         return True
             else:

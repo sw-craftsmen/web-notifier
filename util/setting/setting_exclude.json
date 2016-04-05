@@ -1,0 +1,17 @@
+{
+    "notification":
+    {
+        "test_exclude":
+        {
+            "source":
+            {
+                "path": "raw_$type.txt",
+                "variant": {
+                  "type": ["text"]
+                }
+            },
+            "parse_rule": {"txt": {"key": "transportation"}},
+            "post_analysis": {"exclude": {"type": {"text": "exclude.list"}}}
+        }
+    }
+}

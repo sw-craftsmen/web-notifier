@@ -1,25 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+import sys
 import unittest
+
+
+def get_file(filename):
+    ret_file = filename
+    if not os.path.exists(ret_file):
+        ret_file = "htm_parse/" + ret_file
+    assert os.path.exists(ret_file)
+    return ret_file
 
 
 class HtmParserTest(unittest.TestCase):
     __config_data = None
 
     def setUp(self):
-        print("===============")
-        print("htm parser test")
-        print("===============")
+        pass
 
     def test_htm_parse(self):
-        htm_file = "weather.htm"
+        print("htm parser test", end="")
+        sys.stdout.flush()
+        htm_file = get_file("weather.htm")
         from htm_parse.parser import HtmDataRetriever, IsValidSegment
         is_match_pattern = IsValidSegment(["Hanoi", "Melbourne", "Singapore"], exact_match=True)
         target_sequence = ["City", "Weather", "Temperature(℃)"]
         retriever = HtmDataRetriever(htm_file, is_match_pattern, target_sequence)
 
-        golden_file = "golden.txt"
+        golden_file = get_file("golden.txt")
         with open(golden_file, encoding='utf8') as f:
             golden_entries = f.read().splitlines()
 

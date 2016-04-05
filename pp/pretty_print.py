@@ -36,7 +36,8 @@ def get_beautiful_data(data):
             assert type(timed_data) is collections.OrderedDict
             if not has_actual_timed_data(timed_data):
                 continue
-            pp_data += (str([key_value_pair[1] for key_value_pair in source_key]) + "\n")
+            if len(source_key) > 0:
+                pp_data += (str([key_value_pair[1] for key_value_pair in source_key]) + "\n")
             for iter_new_old in timed_data:
                 one_time_data = timed_data[iter_new_old]
                 if not one_time_data:
