@@ -77,7 +77,7 @@ class Source(object):
 
     def __gen_path(self):
         if not self.variant:
-            empty_keys = {}
+            empty_keys = collections.OrderedDict()
             return iter([[empty_keys, self.perm_path]])
         iter_list = []
         for entry in self.variant:

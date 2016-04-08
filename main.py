@@ -55,7 +55,9 @@ class WebNotifier(object):
             for entry in notification.get_key_and_path():
                 assert isinstance(entry, list) and 2 == len(entry)
                 [key, path] = entry
-                print("[WbNt] %s" % [key_value_pair[1] for key_value_pair in list(key.items())], end="")
+                key_str = "" if 0 == len(key) else \
+                    str([key_value_pair[1] for key_value_pair in list(key.items())])
+                print("[WbNt] %s" % key_str, end="")
                 logging.info("[WbNt] " + path)
                 content = get_content(path, self.args.web_login, self.args.web_password)
                 WebNotifier.backup_content(key, content)
@@ -64,7 +66,7 @@ class WebNotifier(object):
                     assert type(data_list) is list
                     source_key = tuple(sorted(key.items()))  # convert to sorted-tuple, for dict is not hashable
                     parsed_data[source_key] = data_list
-                    print(" => find %i entry(s)" % len(data_list), end="")
+                    print("%sfind %i entry(s)" % (" => " if len(key_str) > 0 else "", len(data_list)), end="")
                 print("")
             analyzed_data = notification.post_analysis.analyze(parsed_data, notify_data)
             notify_data[notify_name] = analyzed_data

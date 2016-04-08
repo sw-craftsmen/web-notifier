@@ -163,7 +163,8 @@ class PostAnalysis(object):
 
     @staticmethod
     def get_serialized_str(key, data):
-        return str(key) + " => " + str(data)
+        key_str = "" if 0 == len(key) else str(key) + " => "
+        return key_str + str(data)
 
     @staticmethod
     def get_list_data(filename):
