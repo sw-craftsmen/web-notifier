@@ -1,3 +1,0 @@
-OrderedDict([('City', 'Hanoi'), ('Temperature(℃)', '11~21'), ('Weather', 'PARTLYCLOUDY')])
-OrderedDict([('City', 'Melbourne'), ('Temperature(℃)', '13~22'), ('Weather', 'CLEAR')])
-OrderedDict([('City', 'Singapore'), ('Temperature(℃)', '25~31'), ('Weather', 'SHOWERS')])

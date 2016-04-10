@@ -17,9 +17,8 @@ def get_parsed_data(web_page, key, sequence):
         import copy
         cases.append(copy.deepcopy(retrieved_data))
         assert len(retrieved_data) == len(sequence)
-        for pattern in sequence:
-            # print("%s => %s" % (pattern, retrieved_data[pattern]))
-            pass
+        """for pattern in sequence:
+             print("%s => %s" % (pattern, retrieved_data[pattern]))"""
     return cases
 
 

@@ -9,7 +9,7 @@ import unittest
 def get_file(filename):
     ret_file = filename
     if not os.path.exists(ret_file):
-        ret_file = "htm_parse/" + ret_file
+        ret_file = "htm_parse/unittest/" + ret_file
     assert os.path.exists(ret_file)
     return ret_file
 
