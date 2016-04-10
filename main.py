@@ -60,7 +60,7 @@ class WebNotifier(object):
                 print("[WbNt] %s" % key_str, end="")
                 logging.info("[WbNt] " + path)
                 content = get_content(path, self.args.web_login, self.args.web_password)
-                WebNotifier.backup_content(key, content)
+                WebNotifier.backup_content(key, content, notify_name)
                 data_list = notification.parser.parse(content)
                 if data_list:
                     assert type(data_list) is list
@@ -81,11 +81,13 @@ class WebNotifier(object):
         logging.info("[WbNt] notification done")
 
     @staticmethod
-    def backup_content(key, content):
+    def backup_content(key, content, notify_name):
         assert isinstance(key, collections.OrderedDict)
         key_name = ""
         for entry in key:
             key_name += ("_" + key[entry])
+        if "" == key_name:
+            key_name = "_" + notify_name
         _, ext_name = os.path.splitext(content)
         backup_dir = "content_backup"
         if not os.path.exists(backup_dir):
