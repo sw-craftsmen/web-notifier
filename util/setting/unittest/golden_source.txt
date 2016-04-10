@@ -1,0 +1,6 @@
+[OrderedDict([('zzz', 'aaa'), ('number', 1)]), 'http://xxx.yyy.aaa/1']
+[OrderedDict([('zzz', 'aaa'), ('number', 2)]), 'http://xxx.yyy.aaa/2']
+[OrderedDict([('zzz', 'aaa'), ('number', 3)]), 'http://xxx.yyy.aaa/3']
+[OrderedDict([('zzz', 'bbb'), ('number', 1)]), 'http://xxx.yyy.bbb/1']
+[OrderedDict([('zzz', 'bbb'), ('number', 2)]), 'http://xxx.yyy.bbb/2']
+[OrderedDict([('zzz', 'bbb'), ('number', 3)]), 'http://xxx.yyy.bbb/3']
