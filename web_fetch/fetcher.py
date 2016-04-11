@@ -59,7 +59,8 @@ def __get_html_content(url, out_file, web_login,  web_password):
         return False
 
     with open(out_file, 'wb') as write_fd:
-        write_fd.write(web_content.read().decode('big5', 'ignore').encode('utf-8'))
+        # TODO: may need read html charSet to decide decode lang...
+        write_fd.write(web_content.read())#.decode('big5', 'ignore').encode('utf-8'))
     return True
 
 

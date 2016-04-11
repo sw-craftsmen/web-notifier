@@ -18,7 +18,7 @@ DEFAULT_OUTFILE = "output.json"
 class WebNotifier(object):
 
     def __init__(self):
-        arg_parser = ArgumentParser()
+        arg_parser = ArgumentParser(description='Web Notifier --- notify exactly the web content you care about')
         arg_parser.add_argument("-c", "--config", dest="config_file", default=DEFAULT_CONFIG_FILE,
                                 help="config file name (default: '%s')" % DEFAULT_CONFIG_FILE)
         arg_parser.add_argument("-cp", "--config_private",
