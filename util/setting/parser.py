@@ -27,7 +27,7 @@ class TxtParser(object):
 
     # currently, use 'key' as 'containing' checking, if check success, get value of string before a blank char
     def parse(self, content):
-        with open(content, 'r') as fd:
+        with open(content, 'r', errors='ignore') as fd:  # ignore error in general may hide some decoding issue...
             found_values = []
             for line_str in fd.readlines():
                 if self.key in line_str:
