@@ -1,0 +1,11 @@
+{
+    "notification":
+    {
+        "test_exclude_uncond":
+        {
+            "source": "raw_text.txt",
+            "parse_rule": {"txt": {"key": "transportation"}},
+            "post_analysis": {"exclude": "exclude.list"}
+        }
+    }
+}

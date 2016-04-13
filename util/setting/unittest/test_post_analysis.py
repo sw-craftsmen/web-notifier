@@ -63,6 +63,9 @@ class PostAnalysisTest(unittest.TestCase):
     def test_exclude(self):
         self.perform_test("exclude", "setting_exclude.json", "golden_exclude.txt")
 
+    def test_exclude_uncond(self):
+        self.perform_test("exclude_uncond", "setting_exclude_uncond.json", "golden_exclude_uncond.txt")
+
     def test_avoid_duplicate(self):
         self.perform_test("avoid_duplicate", "setting_avoid_duplicate.json", "golden_avoid_duplicate.txt")
 

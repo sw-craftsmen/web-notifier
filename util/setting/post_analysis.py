@@ -20,7 +20,7 @@ def file_modified_today(filename):
 
 class PostAnalysis(object):
     def __init__(self, name, exclude_setting=None, remap_setting="", avoid_duplicate=""):
-        assert not exclude_setting or type(exclude_setting) is collections.OrderedDict
+        assert not exclude_setting or type(exclude_setting) in [str, collections.OrderedDict]
         assert type(remap_setting) in [str, collections.OrderedDict]
         assert type(avoid_duplicate) is str
 
@@ -32,16 +32,30 @@ class PostAnalysis(object):
 
         self.mature_file = mature_filename(name)
         self.immature_file = immature_filename(name)
-        self.exclude_setting = PostAnalysis.parse_exclude_setting(exclude_setting) \
-            if exclude_setting and len(exclude_setting) > 0 else []
+        [self.uncond_exclude_setting, self.exclude_setting] = PostAnalysis.parse_exclude_setting(exclude_setting) \
+            if exclude_setting and len(exclude_setting) > 0 else [None, None]
         [self.uncond_remap_dict, self.remap_dict] = PostAnalysis.parse_remap_setting(remap_setting) \
             if len(remap_setting) > 0 else [None, None]
         self.avoid_duplicate = avoid_duplicate
 
     @staticmethod
+    def parse_exclude_file(exclude_file, setting):
+        if not os.path.exists(exclude_file):
+            logging.warning("[analyzer] exclude_file \"%s\" does not exist" % exclude_file)
+            return
+        with open(exclude_file, 'r') as fd:
+            for line in fd.readlines():
+                line_str = line.replace("\n", "")
+                setting[line_str] = 1  # 1 is a dummy value
+
+    @staticmethod
     def parse_exclude_setting(exclude_setting):
-        assert isinstance(exclude_setting, collections.OrderedDict)
         ret_setting = {}
+        if type(exclude_setting) is str:  # it shall be an exclude file
+            exclude_file = exclude_setting
+            PostAnalysis.parse_exclude_file(exclude_file, ret_setting)
+            return [ret_setting, None]
+        assert isinstance(exclude_setting, collections.OrderedDict)
         for exclude_variant in exclude_setting:
             exclude_dict = exclude_setting[exclude_variant]
             assert isinstance(exclude_dict, collections.OrderedDict)
@@ -54,11 +68,8 @@ class PostAnalysis(object):
                     ret_setting[exclude_variant] = {}
                 if exclude_entry not in ret_setting[exclude_variant]:
                     ret_setting[exclude_variant][exclude_entry] = {}
-                with open(exclude_file, 'r') as fd:
-                    for line in fd.readlines():
-                        line_str = line.replace("\n", "")
-                        ret_setting[exclude_variant][exclude_entry][line_str] = 1  # 1 is a dummy value
-        return ret_setting
+                PostAnalysis.parse_exclude_file(exclude_file, ret_setting[exclude_variant][exclude_entry])
+        return [None, ret_setting]
 
     @staticmethod
     def get_remap_dict(remap_csv):
@@ -222,14 +233,29 @@ class PostAnalysis(object):
             PostAnalysis.is_duplicated_in_timed_data(data, aware_data, "old")
 
     def exclude(self, data_to_be_excluded):
+        if not self.uncond_exclude_setting and not self.exclude_setting:
+            return
+        is_uncond_exclude = self.uncond_exclude_setting is not None
+        assert is_uncond_exclude or self.exclude_setting
         for entry in data_to_be_excluded:
             assert type(entry) is tuple
+            if 0 == len(entry) and is_uncond_exclude:
+                exclude_list = []
+                value_list = data_to_be_excluded[entry]
+                for value in value_list:
+                    if value in self.uncond_exclude_setting:
+                        exclude_list.append(value)
+                for value in exclude_list:
+                    value_list.remove(value)
+                data_to_be_excluded[entry] = value_list
+                continue
             for src_key in entry:
                 assert type(src_key) is tuple
-                if src_key[0] in self.exclude_setting:
-                    exclude_variant = self.exclude_setting[src_key[0]]
-                    if src_key[1] in exclude_variant:
-                        exclude_setting = exclude_variant[src_key[1]]
+                if is_uncond_exclude or src_key[0] in self.exclude_setting:
+                    exclude_variant = None if is_uncond_exclude else self.exclude_setting[src_key[0]]
+                    if is_uncond_exclude or src_key[1] in exclude_variant:
+                        exclude_setting = self.uncond_exclude_setting if is_uncond_exclude \
+                          else exclude_variant[src_key[1]]
                         value_list = data_to_be_excluded[entry]
                         assert type(value_list) is list
                         exclude_list = []
