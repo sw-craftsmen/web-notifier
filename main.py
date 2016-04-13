@@ -71,7 +71,9 @@ class WebNotifier(object):
             analyzed_data = notification.post_analysis.analyze(parsed_data, notify_data)
             notify_data[notify_name] = analyzed_data
 
-        print(get_beautiful_data(notify_data))
+        pp_data = get_beautiful_data(notify_data)
+        print(pp_data)
+        self.__config.audiences.notify(pp_data)
 
         import json
         output_file = self.args.output
@@ -100,6 +102,16 @@ class WebNotifier(object):
             if os.path.exists(immature_content_name):
                 copyfile(immature_content_name, mature_content_name)
         copyfile(content, immature_content_name)
+
+
+def adjust_path():
+    pre_path_list = []
+    import sys
+    for path in sys.path:
+        if "web-notifier" in path:
+            pre_path_list.append(path)
+    for path in pre_path_list:
+        sys.path.insert(0, path)
 
 
 if __name__ == '__main__':

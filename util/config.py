@@ -5,10 +5,19 @@ import collections
 import logging
 import os
 import sys
-from util.setting.notify import Notification
 
 
 NOTIFY_KEY = "notification"
+AUDIENCE_KEY = "audience"
+
+
+def adjust_path():  # TODO: remove duplication
+    pre_path_list = []
+    for path in sys.path:
+        if "web-notifier" in path:
+            pre_path_list.append(path)
+    for path in pre_path_list:
+        sys.path.insert(0, path)
 
 
 class Config(object):
@@ -27,16 +36,16 @@ class Config(object):
             logging.warning("[config] no notification specified, program exit...")
             sys.exit()
         for notify_name in notifications:
+            adjust_path()
+            from util.setting.notify import Notification
             self.notifications[notify_name] = Notification.create(notify_name, notifications[notify_name])
+        from util.setting.audience import Audience
+        audiences = config_data[AUDIENCE_KEY] if AUDIENCE_KEY in config_data else None
+        self.audiences = Audience.create(audiences)
 
 if __name__ == '__main__':
-    # logging.basicConfig(level=logging.DEBUG)
-    config_file = "../setting.json"
+    logging.basicConfig(format='', level=logging.DEBUG)
+    #logging.basicConfig(format='')
+    config_file = "sample.json"
     config = Config(config_file)
-    for name in config.notifications:
-        print(name)
-        key_and_path = config.notifications[name].get_key_and_path()
-        for entry in key_and_path:
-            assert isinstance(entry, list) and 2 == len(entry)
-            [_, path] = entry
-            print(path)
+    config.audiences.notify("test_notify")

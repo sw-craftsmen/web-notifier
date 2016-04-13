@@ -15,7 +15,7 @@ def get_file(filename):
     return ret_file
 
 
-def adjust_path():
+def adjust_path():  # TODO: remove duplication
     pre_path_list = []
     for path in sys.path:
         if "web-notifier" in path:
