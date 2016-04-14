@@ -12,5 +12,8 @@
             "parse_rule": {"txt": {"key": "transportation"}}
         }
     },
-    "audience": [["rkan", "its_right@msn.com"]]
+    "audience":
+    {
+        "title": "Sample title for Web-Notifier message `(date)"
+    }
 }

@@ -45,7 +45,7 @@ class Config(object):
 
 if __name__ == '__main__':
     logging.basicConfig(format='', level=logging.DEBUG)
-    #logging.basicConfig(format='')
+    # logging.basicConfig(format='')
     config_file = "sample.json"
     config = Config(config_file)
-    config.audiences.notify("test_notify")
+    config.audiences.notify("test_notification_message")
