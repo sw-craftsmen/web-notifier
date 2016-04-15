@@ -311,5 +311,5 @@ class PostAnalysis(object):
             elif entry == AVOID_DUP_KEY:
                 avoid_duplicate = data[AVOID_DUP_KEY]
             else:
-                logging.warning("[analyzer] unknown item \"%s\"" % entry)
+                logging.warning("[post_analysis] unknown item \"%s\"" % entry)
         return PostAnalysis(name, exclude_setting, remap_setting, avoid_duplicate)

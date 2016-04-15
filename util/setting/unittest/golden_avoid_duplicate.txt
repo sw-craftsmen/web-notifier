@@ -2,7 +2,7 @@
 notification: test_avoid_duplicate_1st
 =================================================================
 ['text']
-new
+new (4)
 	bicycle
 	metro
 	motor

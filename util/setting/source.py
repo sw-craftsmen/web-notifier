@@ -28,7 +28,7 @@ class Source(object):
         assert path and isinstance(path, str)
         self.perm_path = path
         self.variant = variant
-        logging.debug("[setting] path=%s" % self.perm_path)
+        logging.debug("[source] path=%s" % self.perm_path)
         if self.variant:
             for entry in self.variant:
                 variant_data = self.variant[entry]

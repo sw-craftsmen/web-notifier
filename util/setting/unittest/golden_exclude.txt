@@ -2,6 +2,6 @@
 notification: test_exclude
 =================================================================
 ['text']
-new
+new (2)
 	metro
 	car

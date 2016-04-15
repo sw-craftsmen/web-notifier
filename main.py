@@ -28,10 +28,13 @@ class WebNotifier(object):
                                 help="output file name (default: '%s')" % DEFAULT_OUTFILE)
         arg_parser.add_argument("-l", "--login", dest="web_login", default="", help="web authentication login")
         arg_parser.add_argument("-p", "--password", dest="web_password", default="", help="web authentication password")
-        arg_parser.add_argument("-v", "--verbose", dest="log_level", action="store_const",
-                                const=logging.INFO, help="show verbose info")
+        arg_parser.add_argument("-v", "--verbose", dest="verbose", action="store_const",
+                                const=logging.DEBUG, help="verbose mode")
+        arg_parser.add_argument("-s", "--silent", dest="silent", action="store_const",
+                                const=logging.ERROR, help="silent mode")
         self.args = arg_parser.parse_args()
-        logging.basicConfig(format='', level=self.args.log_level)
+        log_level = self.args.verbose if self.args.verbose else self.args.silent if self.args.silent else logging.INFO
+        logging.basicConfig(format='', level=log_level)
 
         from util.config import Config
         self.__config = Config(self.args.config_file)
@@ -49,7 +52,7 @@ class WebNotifier(object):
 
         notify_data = collections.OrderedDict()  # key: notify_name, value: dict (see below)
         for notify_name in self.__config.notifications:
-            print("[WbNt] dealing with notification \"%s\"" % notify_name)
+            logging.info("[WbNt] dealing with notification \"%s\"" % notify_name)
             parsed_data = collections.OrderedDict()  # key: source key, value: list of parsed data
             notification = self.__config.notifications[notify_name]
             for entry in notification.get_key_and_path():
@@ -57,8 +60,7 @@ class WebNotifier(object):
                 [key, path] = entry
                 key_str = "" if 0 == len(key) else \
                     str([key_value_pair[1] for key_value_pair in list(key.items())])
-                print("[WbNt] %s" % key_str, end="")
-                logging.info("[WbNt] " + path)
+                logging.debug("[WbNt] " + path)
                 content = get_content(path, self.args.web_login, self.args.web_password)
                 WebNotifier.backup_content(key, content, notify_name)
                 data_list = notification.parser.parse(content)
@@ -66,13 +68,14 @@ class WebNotifier(object):
                     assert type(data_list) is list
                     source_key = tuple(sorted(key.items()))  # convert to sorted-tuple, for dict is not hashable
                     parsed_data[source_key] = data_list
-                    print("%sfind %i entry(s)" % (" => " if len(key_str) > 0 else "", len(data_list)), end="")
-                print("")
+                    logging.info("[WbNt] %s %sfind %i entry(s)" % (key_str, " => " if len(key_str) > 0 else "", len(data_list)))
+                else:
+                    logging.info("[WbNt] %s" % key_str)
             analyzed_data = notification.post_analysis.analyze(parsed_data, notify_data)
             notify_data[notify_name] = analyzed_data
 
         pp_data = get_beautiful_data(notify_data)
-        print(pp_data)
+        logging.info(pp_data)
         self.__config.audiences.notify(pp_data)
 
         import json

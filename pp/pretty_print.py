@@ -43,12 +43,12 @@ def get_beautiful_data(data):
                 if not one_time_data:
                     continue
                 if type(one_time_data) is list:
-                    pp_data += (iter_new_old + "\n")
+                    pp_data += "%s (%s)\n" % (iter_new_old, len(one_time_data))
                     for entry in one_time_data:
                         entry_str = get_beautiful_value(entry)
                         pp_data += ("\t" + entry_str + "\n")
                 elif isinstance(one_time_data, collections.OrderedDict):
-                    pp_data += (iter_new_old + "\n")
+                    pp_data += "%s (%s)\n" % (iter_new_old, sum([len(one_time_data[map_target]) for map_target in one_time_data]))
                     # shall be a re-mapped entry
                     for map_target in one_time_data:
                         pp_data += ("\t" + map_target + "\n")

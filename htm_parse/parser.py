@@ -78,10 +78,10 @@ class HtmDataRetriever(object):
         for pattern in subsequent_patterns:
             pos_spec.add_spec(pattern, IsValidSegment([pattern]))
         if not analyzer.read_pos(pos_spec):
-            logging.info("[parser] cannot find matched sequence")
+            logging.debug("[parser] cannot find matched sequence")
             return empty_iter
 
-        logging.debug("%i " * (len(subsequent_patterns)) % tuple(analyzer.get_values(subsequent_patterns)))
+        logging.debug("[parser] find sequence no: " + "%i " * (len(subsequent_patterns)) % tuple(analyzer.get_values(subsequent_patterns)))
         value_spec = [[start_pattern, 0, str]]  # start_pattern has position '0;
         for pattern in subsequent_patterns:
             value_spec.append([pattern, analyzer.get_value(pattern), str])

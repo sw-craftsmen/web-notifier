@@ -83,5 +83,5 @@ class Audience(object):
             elif entry == TITLE_KEY:
                 title = data[TITLE_KEY]
             else:
-                logging.warning("[notify] unknown item \"%s\"" % entry)
+                logging.warning("[audience] unknown item \"%s\"" % entry)
         return Audience(sender, receivers, title)
