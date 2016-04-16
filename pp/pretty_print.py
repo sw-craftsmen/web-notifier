@@ -4,12 +4,18 @@
 import collections
 
 
-def get_beautiful_value(value):
+def get_beautiful_value(value, show_full_data):
     assert type(value) in [collections.OrderedDict, str]
     if type(value) is str:
         return value
-    else:
+    if not show_full_data:
         return list(value.items())[0][1]
+    ret_str = ""
+    data_len = len(list(value.items()))
+    for i in range(data_len):
+        ret_str += "," if "" != ret_str else ""
+        ret_str += list(value.items())[i][1]
+    return ret_str
 
 
 def has_actual_timed_data(timed_data):
@@ -23,7 +29,7 @@ def has_actual_timed_data(timed_data):
     return False
 
 
-def get_beautiful_data(data):
+def get_beautiful_data(data, show_full_data=False):
     assert type(data) is collections.OrderedDict
     pp_data = ""
     for notify_name in data:
@@ -45,10 +51,11 @@ def get_beautiful_data(data):
                 if type(one_time_data) is list:
                     pp_data += "%s (%s)\n" % (iter_new_old, len(one_time_data))
                     for entry in one_time_data:
-                        entry_str = get_beautiful_value(entry)
+                        entry_str = get_beautiful_value(entry, show_full_data)
                         pp_data += ("\t" + entry_str + "\n")
                 elif isinstance(one_time_data, collections.OrderedDict):
-                    pp_data += "%s (%s)\n" % (iter_new_old, sum([len(one_time_data[map_target]) for map_target in one_time_data]))
+                    pp_data += "%s (%s)\n" % (iter_new_old,
+                                              sum([len(one_time_data[map_target]) for map_target in one_time_data]))
                     # shall be a re-mapped entry
                     for map_target in one_time_data:
                         pp_data += ("\t" + map_target + "\n")
@@ -59,7 +66,7 @@ def get_beautiful_data(data):
                             if type(entry) is str:
                                 entry_str = entry
                             else:
-                                entry_str = get_beautiful_value(entry)
+                                entry_str = get_beautiful_value(entry, show_full_data)
                             pp_data += ("\t\t" + entry_str + "\n")
                 else:
                     assert False

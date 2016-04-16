@@ -9,8 +9,11 @@ def get_parsed_data(web_page, key, sequence):
     if not web_page or not os.path.exists(web_page):
         return None
 
+    import re
+    re_pattern = re.compile(key)
+
     def is_match_pattern(test_pattern):
-        return key in test_pattern  # TODO: use re
+        return None is not re.match(re_pattern, test_pattern)
 
     cases = []
     for retrieved_data in HtmDataRetriever(web_page, is_match_pattern, sequence):
@@ -81,7 +84,8 @@ class HtmDataRetriever(object):
             logging.debug("[parser] cannot find matched sequence")
             return empty_iter
 
-        logging.debug("[parser] find sequence no: " + "%i " * (len(subsequent_patterns)) % tuple(analyzer.get_values(subsequent_patterns)))
+        logging.debug("[parser] find sequence no: " + "%i " * (len(subsequent_patterns)) %
+                      tuple(analyzer.get_values(subsequent_patterns)))
         value_spec = [[start_pattern, 0, str]]  # start_pattern has position '0;
         for pattern in subsequent_patterns:
             value_spec.append([pattern, analyzer.get_value(pattern), str])

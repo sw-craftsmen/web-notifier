@@ -67,7 +67,7 @@ class HtmAnalyzer(object):
     def __init__(self, htm_file):
         assert type(htm_file) is str
         self.__htm_file = htm_file
-        self.__content = None
+        self.__content = []
         self.__value_map = {}
         self.cur_spec_name = None
         self.__cur_match = False

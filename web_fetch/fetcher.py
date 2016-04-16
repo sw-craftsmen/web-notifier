@@ -3,14 +3,8 @@
 
 import logging
 import os
-import sys
-from subprocess import Popen, PIPE
 
 HTML_FILE_NAME = "retrieved_page.html"
-
-
-def get_web_content(url, login, password):
-    return __get_html_lines(url, login, password)
 
 
 def get_web_page(url, login, password):
@@ -33,17 +27,6 @@ def locate_abs_exec(program):  # 'program' can be an absolute path name, or just
     return None
 
 
-# keep the 'wget' routine as somehow we may possibly still need it?
-def __get_html_by_wget(url, out_file, web_login,  web_password):
-    wget_abs_path = locate_abs_exec("wget")
-    if not wget_abs_path:
-        logging.error("wget is required but does not present, program exits")
-        sys.exit()
-    output, error = Popen([wget_abs_path, "-O", out_file, web_login, web_password, url],
-                          stdout=PIPE, stderr=PIPE).communicate()
-    logging.info(output + error)
-
-
 def __get_html_content(url, out_file, web_login,  web_password):
     import urllib.request
     password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
@@ -55,33 +38,29 @@ def __get_html_content(url, out_file, web_login,  web_password):
     try:
         web_content = urllib.request.urlopen(url)
     except urllib.error.URLError as e:
-        logging.error(str(e))
-        return False
+        return False, str(e)
 
     with open(out_file, 'wb') as write_fd:
         # TODO: may need read html charSet to decide decode lang...
-        write_fd.write(web_content.read())#.decode('big5', 'ignore').encode('utf-8'))
-    return True
-
-
-#
-# Retrieve web content
-#
-def __get_html_lines(url, login, password):
-
-    if not __get_html_content(url, HTML_FILE_NAME, login, password):
-        logging.error("[retriever] cannot open url: " + url)
-        return {}
-
-    with open(HTML_FILE_NAME, "r") as html_fp:
-        html_lines = html_fp.readlines()
-    return html_lines
+        write_fd.write(web_content.read())  # .decode('big5', 'ignore').encode('utf-8'))
+    return True, ""
 
 
 def __get_html(url, login, password):
+    res, msg = __get_html_content(url, HTML_FILE_NAME, login, password)
+    if not res:
+        logging.error("[retriever] cannot open url: %s (%s)" % (url, msg))
+        wget_path = locate_abs_exec("wget")
+        if not wget_path:
+            return None
 
-    if not __get_html_content(url, HTML_FILE_NAME, login, password):
-        logging.error("[retriever] cannot open url: " + url)
-        return None
+        from subprocess import Popen, PIPE, STDOUT
+        wget = Popen([wget_path, url, '--user', login, '--password', password, '-O', HTML_FILE_NAME],
+                     stdout=PIPE, stderr=STDOUT)
+        stdout_data, stderr_data = wget.communicate()
+        if not os.path.exists(HTML_FILE_NAME) or not os.stat(HTML_FILE_NAME).st_size > 0:
+            logging.error("[retriever] \'wget\': fail to fetch page (%s, %s)" % (stdout_data, stderr_data))
+            return None
+        logging.error("[retriever] use \'wget\' to fetch page and succeed")
 
-    return HTML_FILE_NAME  # TODO: use encoded file name
+    return HTML_FILE_NAME

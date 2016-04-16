@@ -17,9 +17,10 @@ class Audience(object):
         assert not receivers or type(receivers) is list
         [self.sender_name, self.sender_addr] = sender if sender else [None, None]
         self.receivers = receivers
-        self.title = self.get_title_str(title)
+        self.title = Audience.get_title_str(title)
 
-    def get_title_str(self, raw_title):
+    @staticmethod
+    def get_title_str(raw_title):
         if not raw_title:
             return "Web-Notifier message"
         if '`' not in raw_title:

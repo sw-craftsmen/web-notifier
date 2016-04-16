@@ -32,6 +32,8 @@ class WebNotifier(object):
                                 const=logging.DEBUG, help="verbose mode")
         arg_parser.add_argument("-s", "--silent", dest="silent", action="store_const",
                                 const=logging.ERROR, help="silent mode")
+        arg_parser.add_argument("-f", "--full_data", dest="full_data", action="store_const",
+                                const=True, help="print full data (default: '%s')" % False)
         self.args = arg_parser.parse_args()
         log_level = self.args.verbose if self.args.verbose else self.args.silent if self.args.silent else logging.INFO
         logging.basicConfig(format='', level=log_level)
@@ -68,13 +70,15 @@ class WebNotifier(object):
                     assert type(data_list) is list
                     source_key = tuple(sorted(key.items()))  # convert to sorted-tuple, for dict is not hashable
                     parsed_data[source_key] = data_list
-                    logging.info("[WbNt] %s %sfind %i entry(s)" % (key_str, " => " if len(key_str) > 0 else "", len(data_list)))
+                    logging.info("[WbNt] %s %sfind %i entry(s)" %
+                                 (key_str, " => " if len(key_str) > 0 else "", len(data_list)))
                 else:
-                    logging.info("[WbNt] %s" % key_str)
+                    if "" != key_str:
+                        logging.info("[WbNt] %s" % key_str)
             analyzed_data = notification.post_analysis.analyze(parsed_data, notify_data)
             notify_data[notify_name] = analyzed_data
 
-        pp_data = get_beautiful_data(notify_data)
+        pp_data = get_beautiful_data(notify_data, self.args.full_data)
         logging.info(pp_data)
         self.__config.audiences.notify(pp_data)
 
@@ -87,6 +91,8 @@ class WebNotifier(object):
 
     @staticmethod
     def backup_content(key, content, notify_name):
+        if not content:
+            return
         assert isinstance(key, collections.OrderedDict)
         key_name = ""
         for entry in key:
