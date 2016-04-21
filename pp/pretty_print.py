@@ -13,8 +13,9 @@ def get_beautiful_value(value, show_full_data):
     ret_str = ""
     data_len = len(list(value.items()))
     for i in range(data_len):
-        ret_str += "," if "" != ret_str else ""
-        ret_str += list(value.items())[i][1]
+        if i > 0:
+            ret_str += '\t\t'
+        ret_str += "%(name)s: %(value)s\n" % {'name': list(value.items())[i][0], 'value': list(value.items())[i][1]}
     return ret_str
 
 

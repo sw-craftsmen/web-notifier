@@ -18,16 +18,19 @@ class HtmParserTest(unittest.TestCase):
     __config_data = None
 
     def setUp(self):
-        pass
+        from wbnt_path import adjust_path
+        adjust_path()
 
     def test_htm_parse(self):
         print("htm parser test", end="")
         sys.stdout.flush()
         htm_file = get_file("weather.htm")
-        from htm_parse.parser import HtmDataRetriever, IsValidSegment
+        from htm_parse.parser import HtmTableDataRetriever, IsValidSegment
         is_match_pattern = IsValidSegment(["Hanoi", "Melbourne", "Singapore"], exact_match=True)
         target_sequence = ["City", "Weather", "Temperature(℃)"]
-        retriever = HtmDataRetriever(htm_file, is_match_pattern, target_sequence)
+        from util.setting.parser import HtmParseSetting, REMOVE_WS_KEY, TRUE, STRIP_KEY
+        setting = HtmParseSetting({REMOVE_WS_KEY: TRUE, STRIP_KEY: TRUE})
+        retriever = HtmTableDataRetriever(htm_file, is_match_pattern, target_sequence, setting)
 
         golden_file = get_file("golden.txt")
         with open(golden_file, encoding='utf8') as f:

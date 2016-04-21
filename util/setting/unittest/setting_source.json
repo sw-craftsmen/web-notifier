@@ -12,7 +12,7 @@
                     "number": [1, 2, 3]
                 }
             },
-            "parse_rule": {"htm": {"key": "unused", "columns": ["unused"]}},
+            "parse_rule": {"htm_table": {"key": "unused", "columns": ["unused"]}},
             "post_analysis": {}
         }
     }

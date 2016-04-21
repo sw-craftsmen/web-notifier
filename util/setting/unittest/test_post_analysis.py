@@ -15,19 +15,11 @@ def get_file(filename):
     return ret_file
 
 
-def adjust_path():  # TODO: remove duplication
-    pre_path_list = []
-    for path in sys.path:
-        if "web-notifier" in path:
-            pre_path_list.append(path)
-    for path in pre_path_list:
-        sys.path.insert(0, path)
-
-
 class PostAnalysisTest(unittest.TestCase):
     __config_data = None
 
     def setUp(self):
+        from wbnt_path import adjust_path
         adjust_path()
 
     def perform_test(self, name, setting_file, golden_file):
