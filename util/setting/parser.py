@@ -4,6 +4,26 @@
 import re
 import os
 
+
+class Parser(object):
+    def __init__(self):
+        self.informative = {}  # entries with 'informative' attribute => to let such entry change not result in 'new'
+
+    @staticmethod
+    def create(data):
+        assert isinstance(data, dict) and 1 == len(data)
+        rule_type = None
+        for key in data:
+            rule_type = key
+        if "htm_table" == rule_type:
+            return HtmTableParser(data[rule_type])
+        if "htm" == rule_type:
+            return HtmParser(data[rule_type])
+        if "txt" == rule_type:
+            return TxtParser(data[rule_type])
+        assert False, rule_type
+
+
 TRUE = "True"
 FALSE = "False"
 
@@ -50,8 +70,9 @@ class HtmParseSetting(object):
 KEY_KEY = "key"
 
 
-class HtmParserBase(object):
+class HtmParserBase(Parser):
     def __init__(self, data):
+        super(HtmParserBase, self).__init__()
         assert isinstance(data, dict) and KEY_KEY in data
         raw_data = data[KEY_KEY]
         assert type(raw_data) in [str, list]
@@ -100,6 +121,7 @@ class HtmTableParser(HtmParserBase):
 
 
 ENTRIES_KEY = "entries"
+INFORMATIVE_KEY = "informative"
 
 
 class HtmParser(HtmParserBase):
@@ -109,6 +131,10 @@ class HtmParser(HtmParserBase):
         entries = data[ENTRIES_KEY]
         assert isinstance(entries, list)
         self.entries = entries
+        for entry in self.entries:
+            if len(entry) > 2 and INFORMATIVE_KEY in entry[2:]:
+                name = entry[1]
+                self.informative[name] = True  # 'True' is a dummy value
 
     def parse(self, content):
         if not is_content_okay(content):
@@ -119,8 +145,9 @@ class HtmParser(HtmParserBase):
         return get_retrieved_data(retriever, len(self.entries))
 
 
-class TxtParser(object):
+class TxtParser(Parser):
     def __init__(self, data):
+        super(TxtParser, self).__init__()
         assert isinstance(data, dict) and KEY_KEY in data
         self.key = data[KEY_KEY]
 
@@ -135,22 +162,3 @@ class TxtParser(object):
                     value = line_str[:end_pos]
                     found_values.append(value)
             return found_values
-
-
-class Parser(object):
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def create(data):
-        assert isinstance(data, dict) and 1 == len(data)
-        rule_type = None
-        for key in data:
-            rule_type = key
-        if "htm_table" == rule_type:
-            return HtmTableParser(data[rule_type])
-        if "htm" == rule_type:
-            return HtmParser(data[rule_type])
-        if "txt" == rule_type:
-            return TxtParser(data[rule_type])
-        assert False, rule_type

@@ -173,9 +173,17 @@ class PostAnalysis(object):
         return remap_data
 
     @staticmethod
-    def get_serialized_str(key, data):
+    def get_serialized_str(key, data, info_entry):
+        if info_entry and type(data) is collections.OrderedDict:
+            import copy
+            stripped_data = copy.deepcopy(data)
+            for info in info_entry:
+                stripped_data.pop(info, None)
+            data_str = str(stripped_data)
+        else:
+            data_str = str(data)
         key_str = "" if 0 == len(key) else str(key) + " => "
-        return key_str + str(data)
+        return key_str + data_str
 
     @staticmethod
     def get_list_data(filename):
@@ -188,14 +196,14 @@ class PostAnalysis(object):
         return list_data
 
     @staticmethod
-    def serialize_timed_data(filename, time_key, timed_data, always_update):
+    def serialize_timed_data(filename, time_key, timed_data, info_entry, always_update):
         if not always_update and os.path.exists(filename) and file_modified_today(filename):
             return
         with open(filename, 'w') as fd:
             for src_key in timed_data:
                 for data in timed_data[src_key][time_key]:
                     assert type(data) in [collections.OrderedDict, str]
-                    fd.write(PostAnalysis.get_serialized_str(src_key, data) + "\n")
+                    fd.write(PostAnalysis.get_serialized_str(src_key, data, info_entry) + "\n")
 
     @staticmethod
     def is_duplicated_in_timed_data(data, timed_data, time_str):
@@ -266,7 +274,7 @@ class PostAnalysis(object):
                             value_list.remove(value)
                         data_to_be_excluded[entry] = value_list
 
-    def analyze(self, raw_data, notify_data):
+    def analyze(self, raw_data, notify_data, info_entry=None):
         assert type(raw_data) is collections.OrderedDict
 
         # filter by exclude list
@@ -286,12 +294,14 @@ class PostAnalysis(object):
             for data in raw_data[src_key]:
                 if self.is_duplicated(data, notify_data):
                     continue
-                time_key = "old" if PostAnalysis.get_serialized_str(src_key, data) in old_data else "new"
+                time_key = "old" if PostAnalysis.get_serialized_str(src_key, data, info_entry) in old_data else "new"
                 timed_data[src_key][time_key].append(data)
 
         # update old result (keep the result valid within one day duration)
-        PostAnalysis.serialize_timed_data(self.mature_file, "old", timed_data, False)  # mature data write once a day
-        PostAnalysis.serialize_timed_data(self.immature_file, "new", timed_data, True)  # immature data always update
+        #   mature data write once a day
+        PostAnalysis.serialize_timed_data(self.mature_file, "old", timed_data, info_entry, False)
+        #   immature data always update
+        PostAnalysis.serialize_timed_data(self.immature_file, "new", timed_data, info_entry, True)
 
         return self.remap(timed_data)  # Note: must be done after new/old differentiation
 

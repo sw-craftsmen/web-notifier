@@ -75,7 +75,8 @@ class WebNotifier(object):
                 else:
                     if "" != key_str:
                         logging.info("[WbNt] %s" % key_str)
-            analyzed_data = notification.post_analysis.analyze(parsed_data, notify_data)
+            info_entry = notification.parser.informative
+            analyzed_data = notification.post_analysis.analyze(parsed_data, notify_data, info_entry)
             notify_data[notify_name] = analyzed_data
 
         pp_data = get_beautiful_data(notify_data, self.args.full_data)

@@ -113,19 +113,15 @@ class HtmDataRetriever(HtmDataRetrieverBase):
             return empty_iter
 
         value_spec = []
-        for [pos, name] in entries:
+        for entry in entries:
+            pos, name = entry[0], entry[1]
             value_spec.append([name, pos, str])
         from htm_parse.parse_engine import HTMSpec
         htm_spec = HTMSpec()
         htm_spec.add_spec("spec_name", is_match_pattern, value_spec)  # we only support one spec. now
-        return HtmDataRetrieverBase._get_value_iters(analyzer, htm_spec, [name for _, name in entries])
+        return HtmDataRetrieverBase._get_value_iters(analyzer, htm_spec, [entry[1] for entry in entries])
 
 
 if __name__ == '__main__':
     # logging.basicConfig(level=logging.DEBUG)
-    htm_file = "weather.htm"
-    is_match_pattern = IsValidSegment(["Hanoi", "Melbourne", "Singapore"], exact_match=True)
-    target_sequence = ["City", "Weather", "Temperature(℃)"]
-    for retrieved_data in HtmDataRetriever(htm_file, is_match_pattern, target_sequence):
-        for pattern in target_sequence:
-            print("%s => %s" % (pattern, retrieved_data[pattern]))
+    pass
