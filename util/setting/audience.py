@@ -48,13 +48,15 @@ class Audience(object):
             logging.error("[error] smtp service not available: %s", e)
             return
         receiver = ['%s' % addr]
+        from email.mime.text import MIMEText
+        content = MIMEText(data.replace("\n", "\t\n"), _charset='UTF-8')  # add '\t' for outlook sometimes remove '\n'
         message = "From %(sender1)s by %(sender2)s\nTo: %(receiver)s\nSubject: %(title)s\n%(content)s" \
                   % {'sender1': "WbNt", 'sender2': self.sender_name, 'receiver': name,
-                     'title': self.title, 'content': data}
+                     'title': self.title, 'content': content}
         pos_sender_domain = self.sender_addr.find('@')
         assert -1 != pos_sender_domain
         sender_domain = self.sender_addr[pos_sender_domain:]
-        decorated_sender_addr = "WbNt_by_" + self.sender_name.replace(' ', '_') + sender_domain
+        decorated_sender_addr = self.sender_name.replace(' ', '_') + "_by_WbNt" + sender_domain
         try:
             smtp_obj.sendmail(decorated_sender_addr, receiver, message)
             logging.info("[notify] successfully sent notification")

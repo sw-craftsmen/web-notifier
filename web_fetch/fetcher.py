@@ -49,9 +49,9 @@ def __get_html_content(url, out_file, web_login,  web_password):
 def __get_html(url, login, password):
     res, msg = __get_html_content(url, HTML_FILE_NAME, login, password)
     if not res:
-        logging.error("[retriever] cannot open url: %s (%s)" % (url, msg))
         wget_path = locate_abs_exec("wget")
         if not wget_path:
+            logging.error("[retriever] cannot open url: %s (%s)" % (url, msg))
             return None
 
         from subprocess import Popen, PIPE, STDOUT
@@ -61,6 +61,5 @@ def __get_html(url, login, password):
         if not os.path.exists(HTML_FILE_NAME) or not os.stat(HTML_FILE_NAME).st_size > 0:
             logging.error("[retriever] \'wget\': fail to fetch page (%s, %s)" % (stdout_data, stderr_data))
             return None
-        logging.error("[retriever] use \'wget\' to fetch page and succeed")
 
     return HTML_FILE_NAME
