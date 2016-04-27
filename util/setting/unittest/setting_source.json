@@ -1,0 +1,19 @@
+{
+    "notification":
+    {
+        "test_source":
+        {
+            "source":
+            {
+                "path": "http://xxx.yyy.$zzz/$number",
+                "variant":
+                {
+                    "zzz": ["aaa", "bbb"],
+                    "number": [1, 2, 3]
+                }
+            },
+            "parse_rule": {"htm_table": {"key": "unused", "columns": ["unused"]}},
+            "post_analysis": {}
+        }
+    }
+}

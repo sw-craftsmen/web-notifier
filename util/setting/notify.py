@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import sys
 from util.setting.source import Source
 from util.setting.parser import Parser
 from util.setting.post_analysis import PostAnalysis

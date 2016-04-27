@@ -4,7 +4,7 @@
 from web_fetch.fetcher import get_web_page
 
 
-def get_content(path, username, password):
+def get_content(path, username=None, password=None):
     if "http" in path:
         return get_web_page(path, username, password)
     import os

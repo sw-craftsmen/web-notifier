@@ -1,0 +1,21 @@
+{
+    "notification":
+    {
+        "animals":
+        {
+            "source": "setting/unittest/raw_text.txt",
+            "parse_rule": {"txt": {"key": "animal"}}
+        },
+        "transportation":
+        {
+            "source": "setting/unittest/raw_text.txt",
+            "parse_rule": {"txt": {"key": "transportation"}}
+        }
+    },
+    "audience":
+    {
+        "sender": ["Judy Hopps", "judy@zootopia.com"],
+        "receivers": [["Nicholas Wilde", "nick@zootopia.com"]],
+        "title": "Sample title for Web-Notifier message `(date)"
+    }
+}

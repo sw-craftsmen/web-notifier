@@ -1,0 +1,11 @@
+=================================================================
+notification: test_remap
+=================================================================
+new (4)
+	Carnivorous
+		tiger
+	Omnivorous
+		whale
+		bear
+	Herbivorous
+		sheep

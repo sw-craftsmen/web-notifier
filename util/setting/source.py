@@ -28,7 +28,7 @@ class Source(object):
         assert path and isinstance(path, str)
         self.perm_path = path
         self.variant = variant
-        logging.debug("path=%s" % self.perm_path)
+        logging.debug("[source] path=%s" % self.perm_path)
         if self.variant:
             for entry in self.variant:
                 variant_data = self.variant[entry]
@@ -77,7 +77,7 @@ class Source(object):
 
     def __gen_path(self):
         if not self.variant:
-            empty_keys = {}
+            empty_keys = collections.OrderedDict()
             return iter([[empty_keys, self.perm_path]])
         iter_list = []
         for entry in self.variant:

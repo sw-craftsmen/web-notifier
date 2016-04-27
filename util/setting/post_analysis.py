@@ -21,7 +21,7 @@ def file_modified_today(filename):
 
 class PostAnalysis(object):
     def __init__(self, name, exclude_setting=None, remap_setting="", avoid_duplicate=""):
-        assert not exclude_setting or type(exclude_setting) is collections.OrderedDict
+        assert not exclude_setting or type(exclude_setting) in [str, collections.OrderedDict]
         assert type(remap_setting) in [str, collections.OrderedDict]
         assert type(avoid_duplicate) is str
 
@@ -33,16 +33,30 @@ class PostAnalysis(object):
 
         self.mature_file = mature_filename(name)
         self.immature_file = immature_filename(name)
-        self.exclude_setting = PostAnalysis.parse_exclude_setting(exclude_setting) \
-            if exclude_setting and len(exclude_setting) > 0 else []
+        [self.uncond_exclude_setting, self.exclude_setting] = PostAnalysis.parse_exclude_setting(exclude_setting) \
+            if exclude_setting and len(exclude_setting) > 0 else [None, None]
         [self.uncond_remap_dict, self.remap_dict] = PostAnalysis.parse_remap_setting(remap_setting) \
             if len(remap_setting) > 0 else [None, None]
         self.avoid_duplicate = avoid_duplicate
 
     @staticmethod
+    def parse_exclude_file(exclude_file, setting):
+        if not os.path.exists(exclude_file):
+            logging.warning("[analyzer] exclude_file \"%s\" does not exist" % exclude_file)
+            return
+        with open(exclude_file, 'r') as fd:
+            for line in fd.readlines():
+                line_str = line.replace("\n", "")
+                setting[line_str] = 1  # 1 is a dummy value
+
+    @staticmethod
     def parse_exclude_setting(exclude_setting):
-        assert isinstance(exclude_setting, collections.OrderedDict)
         ret_setting = {}
+        if type(exclude_setting) is str:  # it shall be an exclude file
+            exclude_file = exclude_setting
+            PostAnalysis.parse_exclude_file(exclude_file, ret_setting)
+            return [ret_setting, None]
+        assert isinstance(exclude_setting, collections.OrderedDict)
         for exclude_variant in exclude_setting:
             if exclude_variant == KEY_KEY:
                 ret_setting[KEY_KEY] = exclude_setting[exclude_variant]
@@ -58,11 +72,8 @@ class PostAnalysis(object):
                     ret_setting[exclude_variant] = {}
                 if exclude_entry not in ret_setting[exclude_variant]:
                     ret_setting[exclude_variant][exclude_entry] = {}
-                with open(exclude_file, 'r') as fd:
-                    for line in fd.readlines():
-                        line_str = line.replace("\n", "")
-                        ret_setting[exclude_variant][exclude_entry][line_str] = 1  # 1 is a dummy value
-        return ret_setting
+                PostAnalysis.parse_exclude_file(exclude_file, ret_setting[exclude_variant][exclude_entry])
+        return [None, ret_setting]
 
     @staticmethod
     def get_remap_dict(remap_csv):
@@ -166,8 +177,17 @@ class PostAnalysis(object):
         return remap_data
 
     @staticmethod
-    def get_serialized_str(key, data):
-        return str(key) + " => " + str(data)
+    def get_serialized_str(key, data, info_entry):
+        if info_entry and type(data) is collections.OrderedDict:
+            import copy
+            stripped_data = copy.deepcopy(data)
+            for info in info_entry:
+                stripped_data.pop(info, None)
+            data_str = str(stripped_data)
+        else:
+            data_str = str(data)
+        key_str = "" if 0 == len(key) else str(key) + " => "
+        return key_str + data_str
 
     @staticmethod
     def get_list_data(filename):
@@ -180,14 +200,14 @@ class PostAnalysis(object):
         return list_data
 
     @staticmethod
-    def serialize_timed_data(filename, time_key, timed_data, always_update):
+    def serialize_timed_data(filename, time_key, timed_data, info_entry, always_update):
         if not always_update and os.path.exists(filename) and file_modified_today(filename):
             return
         with open(filename, 'w') as fd:
             for src_key in timed_data:
                 for data in timed_data[src_key][time_key]:
                     assert type(data) in [collections.OrderedDict, str]
-                    fd.write(PostAnalysis.get_serialized_str(src_key, data) + "\n")
+                    fd.write(PostAnalysis.get_serialized_str(src_key, data, info_entry) + "\n")
 
     @staticmethod
     def is_duplicated_in_timed_data(data, timed_data, time_str):
@@ -198,7 +218,7 @@ class PostAnalysis(object):
             assert type(aware_data) in [list, collections.OrderedDict]
             if type(aware_data) is list:
                 for one_data in aware_data:
-                    assert type(one_data) is collections.OrderedDict
+                    assert type(one_data) in [str, collections.OrderedDict]
                     if one_data == data:
                         return True
             else:
@@ -225,17 +245,32 @@ class PostAnalysis(object):
             PostAnalysis.is_duplicated_in_timed_data(data, aware_data, "old")
 
     def exclude(self, data_to_be_excluded):
+        if not self.uncond_exclude_setting and not self.exclude_setting:
+            return
+        is_uncond_exclude = self.uncond_exclude_setting is not None
+        assert is_uncond_exclude or self.exclude_setting
         if not len(self.exclude_setting):
             return
         exclude_key = self.exclude_setting[KEY_KEY]
         for entry in data_to_be_excluded:
             assert type(entry) is tuple
+            if 0 == len(entry) and is_uncond_exclude:
+                exclude_list = []
+                value_list = data_to_be_excluded[entry]
+                for value in value_list:
+                    if value in self.uncond_exclude_setting:
+                        exclude_list.append(value)
+                for value in exclude_list:
+                    value_list.remove(value)
+                data_to_be_excluded[entry] = value_list
+                continue
             for src_key in entry:
                 assert type(src_key) is tuple
-                if src_key[0] in self.exclude_setting:
-                    exclude_variant = self.exclude_setting[src_key[0]]
-                    if src_key[1] in exclude_variant:
-                        exclude_setting = exclude_variant[src_key[1]]
+                if is_uncond_exclude or src_key[0] in self.exclude_setting:
+                    exclude_variant = None if is_uncond_exclude else self.exclude_setting[src_key[0]]
+                    if is_uncond_exclude or src_key[1] in exclude_variant:
+                        exclude_setting = self.uncond_exclude_setting if is_uncond_exclude \
+                          else exclude_variant[src_key[1]]
                         value_list = data_to_be_excluded[entry]
                         assert type(value_list) is list
                         exclude_list = []
@@ -246,7 +281,7 @@ class PostAnalysis(object):
                             value_list.remove({exclude_key:value})
                         data_to_be_excluded[entry] = value_list
 
-    def analyze(self, raw_data, notify_data):
+    def analyze(self, raw_data, notify_data, info_entry=None):
         assert type(raw_data) is collections.OrderedDict
 
         # filter by exclude list
@@ -266,12 +301,14 @@ class PostAnalysis(object):
             for data in raw_data[src_key]:
                 if self.is_duplicated(data, notify_data):
                     continue
-                time_key = "old" if PostAnalysis.get_serialized_str(src_key, data) in old_data else "new"
+                time_key = "old" if PostAnalysis.get_serialized_str(src_key, data, info_entry) in old_data else "new"
                 timed_data[src_key][time_key].append(data)
 
         # update old result (keep the result valid within one day duration)
-        PostAnalysis.serialize_timed_data(self.mature_file, "old", timed_data, False)  # mature data write once a day
-        PostAnalysis.serialize_timed_data(self.immature_file, "new", timed_data, True)  # immature data always update
+        #   mature data write once a day
+        PostAnalysis.serialize_timed_data(self.mature_file, "old", timed_data, info_entry, False)
+        #   immature data always update
+        PostAnalysis.serialize_timed_data(self.immature_file, "new", timed_data, info_entry, True)
 
         return self.remap(timed_data)  # Note: must be done after new/old differentiation
 
@@ -291,5 +328,5 @@ class PostAnalysis(object):
             elif entry == AVOID_DUP_KEY:
                 avoid_duplicate = data[AVOID_DUP_KEY]
             else:
-                logging.warning("[analyzer] unknown item \"%s\"" % entry)
+                logging.warning("[post_analysis] unknown item \"%s\"" % entry)
         return PostAnalysis(name, exclude_setting, remap_setting, avoid_duplicate)

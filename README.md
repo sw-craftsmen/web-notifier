@@ -7,6 +7,8 @@ Have you ever thought a tool can magically do the above routine for you?
 
 If that is the case, then web-notifier comes to your rescue.
 
+<a href="https://raw.githubusercontent.com/r-kan/r-kan.github.io/master/images/web-notifier/infrastructure.png" target="_blank"><img border="0" alt="Web-Notifier infrastructure" src="https://raw.githubusercontent.com/r-kan/r-kan.github.io/master/images/web-notifier/infrastructure.png"></a>
+
 # Features
 web-notifier aims to provide the following features:
 

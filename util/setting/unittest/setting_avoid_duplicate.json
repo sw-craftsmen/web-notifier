@@ -1,0 +1,22 @@
+{
+    "notification":
+    {
+        "test_avoid_duplicate_1st":
+        {
+            "source":
+            {
+                "path": "raw_$type.txt",
+                "variant": {
+                  "type": ["text"]
+                }
+            },
+            "parse_rule": {"txt": {"key": "transportation"}}
+        },
+        "test_avoid_duplicate_2nd":
+        {
+            "source": "raw_text.txt",
+            "parse_rule": {"txt": {"key": "transportation"}},
+            "post_analysis": {"avoid_duplicate": "test_avoid_duplicate_1st"}
+        }
+    }
+}

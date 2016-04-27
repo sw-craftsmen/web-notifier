@@ -1,0 +1,14 @@
+{
+    "notification":
+    {
+        "test_remap":
+        {
+            "source":
+            {
+                "path": "raw_text.txt"
+            },
+            "parse_rule": {"txt": {"key": "animal"}},
+            "post_analysis": {"re-map": "vorous.csv"}
+        }
+    }
+}

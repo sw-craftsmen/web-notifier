@@ -1,0 +1,8 @@
+tiger animal
+whale animal
+bicycle transportation
+metro transportation
+sheep animal
+motor transportation
+bear animal
+car transportation
