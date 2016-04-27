@@ -8,6 +8,7 @@ import os
 EXCLUDE_KEY = "exclude"
 REMAP_KEY = "re-map"
 AVOID_DUP_KEY = "avoid_duplicate"
+KEY_KEY = "key"
 
 
 def file_modified_today(filename):
@@ -43,6 +44,9 @@ class PostAnalysis(object):
         assert isinstance(exclude_setting, collections.OrderedDict)
         ret_setting = {}
         for exclude_variant in exclude_setting:
+            if exclude_variant == KEY_KEY:
+                ret_setting[KEY_KEY] = exclude_setting[exclude_variant]
+                continue
             exclude_dict = exclude_setting[exclude_variant]
             assert isinstance(exclude_dict, collections.OrderedDict)
             for exclude_entry in exclude_dict:
@@ -221,6 +225,9 @@ class PostAnalysis(object):
             PostAnalysis.is_duplicated_in_timed_data(data, aware_data, "old")
 
     def exclude(self, data_to_be_excluded):
+        if not len(self.exclude_setting):
+            return
+        exclude_key = self.exclude_setting[KEY_KEY]
         for entry in data_to_be_excluded:
             assert type(entry) is tuple
             for src_key in entry:
@@ -233,10 +240,10 @@ class PostAnalysis(object):
                         assert type(value_list) is list
                         exclude_list = []
                         for value in value_list:
-                            if value['Test'] in exclude_setting:
-                                exclude_list.append(value['Test'])
+                            if value[exclude_key] in exclude_setting:
+                                exclude_list.append(value[exclude_key])
                         for value in exclude_list:
-                            value_list.remove({'Test':value})
+                            value_list.remove({exclude_key:value})
                         data_to_be_excluded[entry] = value_list
 
     def analyze(self, raw_data, notify_data):
