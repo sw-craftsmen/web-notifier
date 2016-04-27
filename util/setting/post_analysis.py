@@ -8,6 +8,7 @@ import os
 EXCLUDE_KEY = "exclude"
 REMAP_KEY = "re-map"
 AVOID_DUP_KEY = "avoid_duplicate"
+KEY_KEY = "key"
 
 
 def file_modified_today(filename):
@@ -19,7 +20,7 @@ def file_modified_today(filename):
 
 
 class PostAnalysis(object):
-    def __init__(self, name, exclude_setting=None, remap_setting="", avoid_duplicate=""):
+    def __init__(self, name, key="", exclude_setting=None, remap_setting="", avoid_duplicate=""):
         assert not exclude_setting or type(exclude_setting) in [str, collections.OrderedDict]
         assert type(remap_setting) in [str, collections.OrderedDict]
         assert type(avoid_duplicate) is str
@@ -32,6 +33,7 @@ class PostAnalysis(object):
 
         self.mature_file = mature_filename(name)
         self.immature_file = immature_filename(name)
+        self.key = key
         [self.uncond_exclude_setting, self.exclude_setting] = PostAnalysis.parse_exclude_setting(exclude_setting) \
             if exclude_setting and len(exclude_setting) > 0 else [None, None]
         [self.uncond_remap_dict, self.remap_dict] = PostAnalysis.parse_remap_setting(remap_setting) \
@@ -46,16 +48,18 @@ class PostAnalysis(object):
         with open(exclude_file, 'r') as fd:
             for line in fd.readlines():
                 line_str = line.replace("\n", "")
-                setting[line_str] = 1  # 1 is a dummy value
+                setting.append(line_str.strip())
+#                setting[line_str] = 1  # 1 is a dummy value
 
     @staticmethod
     def parse_exclude_setting(exclude_setting):
-        ret_setting = {}
         if type(exclude_setting) is str:  # it shall be an exclude file
+            ret_setting = []
             exclude_file = exclude_setting
             PostAnalysis.parse_exclude_file(exclude_file, ret_setting)
             return [ret_setting, None]
         assert isinstance(exclude_setting, collections.OrderedDict)
+        ret_setting = {}
         for exclude_variant in exclude_setting:
             exclude_dict = exclude_setting[exclude_variant]
             assert isinstance(exclude_dict, collections.OrderedDict)
@@ -67,7 +71,7 @@ class PostAnalysis(object):
                 if exclude_variant not in ret_setting:
                     ret_setting[exclude_variant] = {}
                 if exclude_entry not in ret_setting[exclude_variant]:
-                    ret_setting[exclude_variant][exclude_entry] = {}
+                    ret_setting[exclude_variant][exclude_entry] = []
                 PostAnalysis.parse_exclude_file(exclude_file, ret_setting[exclude_variant][exclude_entry])
         return [None, ret_setting]
 
@@ -245,13 +249,14 @@ class PostAnalysis(object):
             return
         is_uncond_exclude = self.uncond_exclude_setting is not None
         assert is_uncond_exclude or self.exclude_setting
+        exclude_key = self.key
         for entry in data_to_be_excluded:
             assert type(entry) is tuple
             if 0 == len(entry) and is_uncond_exclude:
                 exclude_list = []
                 value_list = data_to_be_excluded[entry]
                 for value in value_list:
-                    if value in self.uncond_exclude_setting:
+                    if value[exclude_key] in self.uncond_exclude_setting:
                         exclude_list.append(value)
                 for value in exclude_list:
                     value_list.remove(value)
@@ -265,14 +270,13 @@ class PostAnalysis(object):
                         exclude_setting = self.uncond_exclude_setting if is_uncond_exclude \
                           else exclude_variant[src_key[1]]
                         value_list = data_to_be_excluded[entry]
+                        new_value_list= []
                         assert type(value_list) is list
                         exclude_list = []
                         for value in value_list:
-                            if value in exclude_setting:
-                                exclude_list.append(value)
-                        for value in exclude_list:
-                            value_list.remove(value)
-                        data_to_be_excluded[entry] = value_list
+                            if value[exclude_key].strip() not in exclude_setting:
+                                new_value_list.append(value)
+                        data_to_be_excluded[entry] = new_value_list
 
     def analyze(self, raw_data, notify_data, info_entry=None):
         assert type(raw_data) is collections.OrderedDict
@@ -310,11 +314,14 @@ class PostAnalysis(object):
         if not data:
             return PostAnalysis(name)
         assert isinstance(data, dict)
+        key = ""
         exclude_setting = {}
         remap_setting = ""
         avoid_duplicate = ""
         for entry in data:
-            if entry == EXCLUDE_KEY:
+            if entry == KEY_KEY:
+                key = data[KEY_KEY]
+            elif entry == EXCLUDE_KEY:
                 exclude_setting = data[EXCLUDE_KEY]
             elif entry == REMAP_KEY:
                 remap_setting = data[REMAP_KEY]
@@ -322,4 +329,4 @@ class PostAnalysis(object):
                 avoid_duplicate = data[AVOID_DUP_KEY]
             else:
                 logging.warning("[post_analysis] unknown item \"%s\"" % entry)
-        return PostAnalysis(name, exclude_setting, remap_setting, avoid_duplicate)
+        return PostAnalysis(name, key, exclude_setting, remap_setting, avoid_duplicate)
