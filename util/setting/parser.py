@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from htm_parse.parser import get_parsed_data
 import collections
 import re
 import os
@@ -102,10 +101,6 @@ def get_retrieved_data(retriever, expected_data_len):
     return data
 
 
-COLUMNS_KEY = "columns"
-SEPERATOR_KEY = "seperator"
-GLOBAL_KEY = "global_keys"
-
 
 class HtmTableParser(HtmParserBase):
     def __init__(self, data):
@@ -148,6 +143,9 @@ class HtmParser(HtmParserBase):
         retriever = HtmDataRetriever(content, self, self.entries, self.setting)
         return get_retrieved_data(retriever, len(self.entries))
 
+COLUMNS_KEY = "columns"
+SEPERATOR_KEY = "seperator"
+GLOBAL_KEY = "global_keys"
 
 class TxtParser(Parser):
     def __init__(self, data):

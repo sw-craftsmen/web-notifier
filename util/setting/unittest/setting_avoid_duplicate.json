@@ -10,13 +10,31 @@
                   "type": ["text"]
                 }
             },
-            "parse_rule": {"txt": {"key": "transportation"}}
+            "parse_rule": 
+            {
+                "txt": {
+                    "key": "transportation",
+                    "seperator": " ",
+                    "columns": ["value", "key"]
+                }
+            }
         },
         "test_avoid_duplicate_2nd":
         {
             "source": "raw_text.txt",
-            "parse_rule": {"txt": {"key": "transportation"}},
-            "post_analysis": {"avoid_duplicate": "test_avoid_duplicate_1st"}
+            "parse_rule": 
+            {
+                "txt": 
+                {
+                    "key": "transportation",
+                    "seperator": " ",
+                    "columns": ["value", "key"]
+                }
+            },
+            "post_analysis": {
+                "key": "value",
+                "avoid_duplicate": "test_avoid_duplicate_1st"
+            }
         }
     }
 }
