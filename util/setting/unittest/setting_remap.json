@@ -11,7 +11,7 @@
             {
                 "txt": {
                     "key": "animal",
-                    "seperator": " ",
+                    "separator": " ",
                     "columns": ["value", "key"]
                 }
             },

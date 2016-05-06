@@ -101,7 +101,6 @@ def get_retrieved_data(retriever, expected_data_len):
     return data
 
 
-
 class HtmTableParser(HtmParserBase):
     def __init__(self, data):
         super(HtmTableParser, self).__init__(data)
@@ -144,28 +143,34 @@ class HtmParser(HtmParserBase):
         return get_retrieved_data(retriever, len(self.entries))
 
 COLUMNS_KEY = "columns"
-SEPERATOR_KEY = "seperator"
+SEPARATOR_KEY = "separator"
 GLOBAL_KEY = "global_keys"
+
 
 class TxtParser(Parser):
     def __init__(self, data):
         super(TxtParser, self).__init__()
-        assert isinstance(data, dict) and KEY_KEY in data and COLUMNS_KEY in data and SEPERATOR_KEY in data
+        assert isinstance(data, dict) and KEY_KEY in data and COLUMNS_KEY in data and SEPARATOR_KEY in data
         self.key = data[KEY_KEY]
         columns = data[COLUMNS_KEY]
         assert isinstance(columns, list)
         self.columns = columns
-        self.seperator = data[SEPERATOR_KEY]
+        self.separator = data[SEPARATOR_KEY]
         self.global_keys = data[GLOBAL_KEY] if GLOBAL_KEY in data else {}
+        if INFORMATIVE_KEY in data:
+            informative_list = data[INFORMATIVE_KEY]
+            assert type(informative_list) is list
+            for entry in informative_list:
+                assert type(entry) is str
+                self.informative[entry] = True  # 'True' is a dummy value
 
-    # currently, use 'key' as 'containing' checking, if check success, get value of string before a blank char
     def parse(self, content):
         with open(content, 'r', errors='ignore') as fd:  # ignore error in general may hide some decoding issue...
             found_values = []
             global_keys = collections.OrderedDict()
             for line_str in fd.readlines():
                 if self.key in line_str:
-                    entry = line_str.split(self.seperator)
+                    entry = line_str.split(self.separator)
                     found_value = collections.OrderedDict()
                     for i in range(len(entry)):
                         found_value[self.columns[i]] = entry[i]

@@ -14,7 +14,7 @@
             {
                 "txt": {
                     "key": "transportation",
-                    "seperator": " ",
+                    "separator": " ",
                     "columns": ["value", "key"]
                 }
             }
@@ -27,7 +27,7 @@
                 "txt": 
                 {
                     "key": "transportation",
-                    "seperator": " ",
+                    "separator": " ",
                     "columns": ["value", "key"]
                 }
             },
