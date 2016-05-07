@@ -2,10 +2,10 @@
 notification: test_remap
 =================================================================
 new (4)
-	Carnivorous
+	Carnivorous (1)
 		tiger
-	Omnivorous
+	Omnivorous (2)
 		whale
 		bear
-	Herbivorous
+	Herbivorous (1)
 		sheep
