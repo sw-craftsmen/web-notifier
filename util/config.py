@@ -11,15 +11,6 @@ NOTIFY_KEY = "notification"
 AUDIENCE_KEY = "audience"
 
 
-def adjust_path():  # TODO: remove duplication
-    pre_path_list = []
-    for path in sys.path:
-        if "web-notifier" in path:
-            pre_path_list.append(path)
-    for path in pre_path_list:
-        sys.path.insert(0, path)
-
-
 class Config(object):
 
     def __init__(self, config_file):
@@ -36,6 +27,7 @@ class Config(object):
             logging.warning("[config] no notification specified, program exit...")
             sys.exit()
         for notify_name in notifications:
+            from wbnt_path import adjust_path
             adjust_path()
             from util.setting.notify import Notification
             self.notifications[notify_name] = Notification.create(notify_name, notifications[notify_name])
